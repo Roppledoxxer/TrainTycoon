@@ -336,7 +336,7 @@
     }
     const cost = selectedTool === 'bridge' ? 80 : 20;
     if (money < cost) return flash('Not enough money');
-    if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can't build here');
+    if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can\'t build here');
     if (builtObjects.has(k)) return flash('Tile already used');
     const piece = { type:selectedTool, rot:rotation&3, line:selectedLine, cost };
     builtObjects.set(k, piece);
@@ -361,7 +361,7 @@
       angle:Math.atan2(start.dy,start.dx),
       capacity:10, load:0, paused:0,
       crashed:false, crashT:0, vx:0, vy:0, color:lineColors[line],
-      nearbyStations: new Set() // track which adjacent stations we've already awarded for
+      nearbyStations: new Set()
     };
     trains.push(t);
     renderFactoryMenu(); flash(`Deployed a ${line} train`);
@@ -411,12 +411,9 @@
     const dist = Math.hypot(dx,dy);
     const speed = train.targetSpeed;
     if (dist <= speed * dt || dist < 2) {
-      // arrived
       train.x = targetX; train.y = targetY;
       train.fromX = train.toX; train.fromY = train.toY;
 
-      // --- NEW: reward when a station is adjacent to the tile the train just arrived on
-      // check four neighbors, award $20 for any station that the train hasn't already been awarded for during this adjacency
       const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
       const newlyAdjacent = [];
       for (const n of neighbors) {
@@ -432,7 +429,6 @@
         for (const k of newlyAdjacent) train.nearbyStations.add(k);
         flash(`Train passed ${newlyAdjacent.length > 1 ? 'stations' : 'a station'}: +$${amount}`);
       }
-      // prune any stations that are no longer adjacent (keeps the set small)
       const currentAdj = new Set();
       for (const n of neighbors) {
         const k = keyFor(train.toX + n.dx, train.toY + n.dy);
@@ -501,7 +497,6 @@
     }
   }
 
-  // --- Updates (physics)
   function updateStations(dt) { for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers*0.12) * dt); }
   function updateEconomy(dt) { money += workers * 5 * dt; }
   function updatePlayer(dt) {
@@ -513,7 +508,6 @@
   }
   function updateCamera() { camera.x = player.x; camera.y = player.y; }
 
-  // --- Drawing helpers
   function worldToScreenX(wx) { return wx - camera.x + window.innerWidth/2; }
   function worldToScreenY(wy) { return wy - camera.y + window.innerHeight/2; }
 
@@ -588,7 +582,7 @@
       ctx.fillStyle = lineColors[selectedLine]; ctx.globalAlpha = 0.35;
       if (selectedTool === 'straight' || selectedTool === 'bridge') { const h=(rotation&1)===0; if (h) ctx.fillRect(2,14,28,4); else ctx.fillRect(14,2,4,28); }
       else if (selectedTool === 'curve') { ctx.strokeStyle=lineColors[selectedLine]; ctx.lineWidth=5; ctx.beginPath();
-        switch (rotation&3) { case 0: ctx.moveTo(16,2); ctx.lineTo(16,16); ctx.lineTo(30,16); break; case 1: ctx.moveTo(30,16); ctx.lineTo(16,16); ctx.lineTo(16,30); break; case 2: ctx.moveTo(16,30); ctx.lineTo(16,16); ctx.lineTo(2,16); break; default: ctx.moveTo(2,16); ctx.lineTo(16,16); ctx.lineTo(16,2); }
+        switch (rotation&3) { case 0: ctx.moveTo(16,2); ctx.lineTo(16,16); ctx.lineTo(30,16); break; case 1: ctx.moveTo(30,16); ctx.lineTo(16,16); ctx.lineTo(16,30); break; case 2: ctx.moveTo(16,30); ctx.lineTo(2,30); ctx.lineTo(2,16); break; default: ctx.moveTo(2,16); ctx.lineTo(2,2); ctx.lineTo(16,2); }
         ctx.stroke();
       } else if (selectedTool === 'station') ctx.fillRect(6,6,20,20);
       ctx.globalAlpha = 1;
@@ -599,7 +593,7 @@
   function updateStats() {
     const activeCounts = { red:0, blue:0, yellow:0 };
     for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line]||0) + 1;
-    const linesHtml = lineKeys.map(line => `<div><span><span class="chip ${line}"></span>${line[0].toUpperCase()+line.slice(1)}:</span> ${builtCounts[line]} pieces, ${trainStock[line]} owned, ${activeCounts[line]} active</span></div>`).join('');
+    const linesHtml = lineKeys.map(line => `<div><span><span class="chip ${line}"></span>${line[0].toUpperCase()+line.slice(1)}:</span> ${builtCounts[line]} pieces, ${trainStock[line]} owned, ${activeCounts[line]} active</div>`).join('');
     statsEl.innerHTML = `
       <div><span>Money:</span> $${money.toFixed(0)}</div>
       <div><span>Worker income:</span> $${(workers*5).toFixed(0)}/sec</div>
@@ -613,16 +607,13 @@
     `;
   }
 
-  // --- Main game loop: FIXED physics + interpolated render
-  const physicsStep = 1/60; // 60 Hz physics
+  const physicsStep = 1/60;
   const maxStepsPerFrame = 4;
   let accumulator = 0;
   let lastTime = performance.now() / 1000;
 
   function physicsUpdate(dt) {
-    // mark previous positions for interpolation
     for (const t of trains) { t.prevX = t.x; t.prevY = t.y; }
-    // run physics
     updatePlayer(dt);
     updateEconomy(dt);
     updateStations(dt);
@@ -641,7 +632,6 @@
 
     ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(0,0,W,H);
 
-    // draw chunk canvases
     const cminCX = Math.floor(minX/CHUNK), cmaxCX = Math.floor(maxX/CHUNK);
     const cminCY = Math.floor(minY/CHUNK), cmaxCY = Math.floor(maxY/CHUNK);
     for (let cy=cminCY; cy<=cmaxCY; cy++) {
@@ -691,7 +681,6 @@
     requestAnimationFrame(loop);
   }
 
-  // --- Input handlers
   function updateMouse(ev) {
     const rect = canvas.getBoundingClientRect();
     mouse.x = ev.clientX - rect.left; mouse.y = ev.clientY - rect.top;
@@ -723,7 +712,6 @@
   });
   window.addEventListener('keyup', e => keys.delete(e.code));
 
-  // --- UI wiring
   document.getElementById('tool-straight').addEventListener('click', ()=>{ selectedTool='straight'; refreshButtons(); });
   document.getElementById('tool-curve').addEventListener('click', ()=>{ selectedTool='curve'; refreshButtons(); });
   document.getElementById('tool-station').addEventListener('click', ()=>{ selectedTool='station'; refreshButtons(); });
@@ -737,7 +725,6 @@
   document.getElementById('center').addEventListener('click', ()=>{ player.x = 0; player.y = 0; camera.x = 0; camera.y = 0; });
   document.getElementById('close-factory-menu').addEventListener('click', hideFactoryMenu);
 
-  // init & start
   refreshButtons();
   flash('Build a line from the factory at the center. Right-click the factory to buy and deploy trains.');
   requestAnimationFrame(loop);
