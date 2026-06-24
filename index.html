@@ -16,14 +16,14 @@
     html,body { margin:0; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; user-select:none; }
     canvas { display:block; width:100vw; height:100vh; cursor:crosshair; background: linear-gradient(#c9e9ff,#eaf5ff 35%,#d6efc3 35%,#d6efc3); image-rendering:pixelated; }
     .hud { position:fixed; inset:0; pointer-events:none; }
-    .panel,.legend,.footer,.menu { position:absolute; background:var(--panel); border:1px solid rgba(255,255,255,0.12); border-radius:16px; backdrop-filter:blur(8px); box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+    .panel,.legend,.footer,.menu { position:absolute; background:var(--panel); border:1px solid rgba(255,255,255,0.12); border-radius:16px; backdrop-filter:blur(8px); box-shadow:0 10px 30px rgba(0,0,0,0.3); }
     .panel { left:12px; top:12px; max-width:420px; padding:12px; pointer-events:auto; }
     .legend { right:12px; top:12px; width:260px; padding:12px; pointer-events:none; font-size:13px; line-height:1.55; }
     .footer { left:12px; bottom:12px; padding:10px 12px; pointer-events:none; max-width:760px; }
     .menu { display:none; left:50%; top:50%; transform:translate(-50%,-50%); width:350px; padding:12px; pointer-events:auto; z-index:20; }
     h1 { margin:0 0 8px 0; font-size:20px; }
     .row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
-    button { pointer-events:auto; border:0; border-radius:12px; padding:9px 11px; background:rgba(255,255,255,0.08); color:var(--text); font-weight:700; cursor:pointer; transition:transform .12s ease, background .12s ease; }
+    button { pointer-events:auto; border:0; border-radius:12px; padding:9px 11px; background:rgba(255,255,255,0.08); color:var(--text); font-weight:700; cursor:pointer; transition:transform .12s ease,background .12s ease; }
     button:hover { transform:translateY(-1px); background:rgba(255,255,255,0.14); }
     button.active { outline:2px solid var(--accent); background:rgba(127,212,255,0.14); }
     button.danger.active { outline-color:var(--danger); background:rgba(255,106,106,0.12); }
@@ -251,21 +251,22 @@
     return [];
   }
 
-  function hasFactoryConnectionForLine(line) {
+  function hasTrackWithinOneForLine(line) {
     const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
     for (const n of neighbors) {
       const piece = builtObjects.get(keyFor(n.dx, n.dy));
-      if (!piece || piece.line !== line) continue;
-      if (getConnections(piece).some(([dx,dy]) => dx === -n.dx && dy === -n.dy)) return true;
+      if (piece && piece.line === line) return true;
     }
     return false;
   }
-  function getFactoryExitForLine(line) {
+
+  function getTrackExitForLine(line) {
     const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
     for (const n of neighbors) {
       const piece = builtObjects.get(keyFor(n.dx, n.dy));
-      if (!piece || piece.line !== line) continue;
-      if (getConnections(piece).some(([dx,dy]) => dx === -n.dx && dy === -n.dy)) return { tx:n.dx, ty:n.dy, dx:n.dx, dy:n.dy };
+      if (piece && piece.line === line) {
+        return { tx:n.dx, ty:n.dy, dx:n.dx, dy:n.dy };
+      }
     }
     return null;
   }
@@ -306,7 +307,7 @@
         <button class="small" data-deploy="blue">Deploy Blue</button>
         <button class="small" data-deploy="yellow">Deploy Yellow</button>
       </div>
-      <div style="margin-top:8px; color:#a7b2bf;">A train can only leave the factory if there is a connected track tile next to it.</div>
+      <div style="margin-top:8px; color:#a7b2bf;">A train can only leave the factory if there is a track tile next to it.</div>
     `;
     factoryMenuBody.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyTrain(b.dataset.buy));
     factoryMenuBody.querySelectorAll('[data-deploy]').forEach(b=>b.onclick=()=>deployTrain(b.dataset.deploy));
@@ -335,7 +336,7 @@
     }
     const cost = selectedTool === 'bridge' ? 80 : 20;
     if (money < cost) return flash('Not enough money');
-    if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can’t build here');
+    if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can't build here');
     if (builtObjects.has(k)) return flash('Tile already used');
     const piece = { type:selectedTool, rot:rotation&3, line:selectedLine, cost };
     builtObjects.set(k, piece);
@@ -347,9 +348,9 @@
 
   function deployTrain(line) {
     if (trainStock[line] <= 0) return flash(`No ${line} trains owned`);
-    if (!hasFactoryConnectionForLine(line)) return flash('Put a connected track next to the factory first');
-    const start = getFactoryExitForLine(line);
-    if (!start) return flash('Track must connect directly to the factory');
+    if (!hasTrackWithinOneForLine(line)) return flash('Put a track next to the factory first');
+    const start = getTrackExitForLine(line);
+    if (!start) return flash('No track found next to the factory');
     trainStock[line] -= 1;
     const t = {
       deployed:true, line,
@@ -549,9 +550,9 @@
         ctx.stroke();
       } else if (obj.type === 'curve') {
         ctx.lineWidth = 6; ctx.beginPath();
-        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-14); ctx.quadraticCurveTo(0,0,14,0); break; case 1: ctx.moveTo(14,0); ctx.quadraticCurveTo(0,0,0,14); break; case 2: ctx.moveTo(0,14); ctx.quadraticCurveTo(0,0,-14,0); break; default: ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,0,0,-14); break; }
+        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-14); ctx.quadraticCurveTo(0,0,14,0); break; case 1: ctx.moveTo(14,0); ctx.quadraticCurveTo(0,0,0,14); break; case 2: ctx.moveTo(0,14); ctx.quadraticCurveTo(0,0,-14,0); break; default: ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,0,0,-14); }
         ctx.stroke(); ctx.lineWidth = 3; ctx.beginPath();
-        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-10); ctx.quadraticCurveTo(0,0,10,0); break; case 1: ctx.moveTo(10,0); ctx.quadraticCurveTo(0,0,0,10); break; case 2: ctx.moveTo(0,10); ctx.quadraticCurveTo(0,0,-10,0); break; default: ctx.moveTo(-10,0); ctx.quadraticCurveTo(0,0,0,-10); break; }
+        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-10); ctx.quadraticCurveTo(0,0,10,0); break; case 1: ctx.moveTo(10,0); ctx.quadraticCurveTo(0,0,0,10); break; case 2: ctx.moveTo(0,10); ctx.quadraticCurveTo(0,0,-10,0); break; default: ctx.moveTo(-10,0); ctx.quadraticCurveTo(0,0,0,-10); }
         ctx.stroke();
       }
       ctx.restore();
@@ -587,7 +588,8 @@
       ctx.fillStyle = lineColors[selectedLine]; ctx.globalAlpha = 0.35;
       if (selectedTool === 'straight' || selectedTool === 'bridge') { const h=(rotation&1)===0; if (h) ctx.fillRect(2,14,28,4); else ctx.fillRect(14,2,4,28); }
       else if (selectedTool === 'curve') { ctx.strokeStyle=lineColors[selectedLine]; ctx.lineWidth=5; ctx.beginPath();
-        switch (rotation&3) { case 0: ctx.moveTo(16,2); ctx.lineTo(16,16); ctx.lineTo(30,16); break; case 1: ctx.moveTo(30,16); ctx.lineTo(16,16); ctx.lineTo(16,30); break; case 2: ctx.moveTo(16,30); ctx.lineTo(16,16); ctx.lineTo(2,16); break; default: ctx.moveTo(2,16); ctx.lineTo(16,16); ctx.lineTo(16,2); break; } ctx.stroke();
+        switch (rotation&3) { case 0: ctx.moveTo(16,2); ctx.lineTo(16,16); ctx.lineTo(30,16); break; case 1: ctx.moveTo(30,16); ctx.lineTo(16,16); ctx.lineTo(16,30); break; case 2: ctx.moveTo(16,30); ctx.lineTo(16,16); ctx.lineTo(2,16); break; default: ctx.moveTo(2,16); ctx.lineTo(16,16); ctx.lineTo(16,2); }
+        ctx.stroke();
       } else if (selectedTool === 'station') ctx.fillRect(6,6,20,20);
       ctx.globalAlpha = 1;
     } else { ctx.strokeStyle='rgba(255,80,80,0.95)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(4,4); ctx.lineTo(28,28); ctx.moveTo(28,4); ctx.lineTo(4,28); ctx.stroke(); }
@@ -597,7 +599,7 @@
   function updateStats() {
     const activeCounts = { red:0, blue:0, yellow:0 };
     for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line]||0) + 1;
-    const linesHtml = lineKeys.map(line => `<div><span><span class="chip ${line}"></span>${line[0].toUpperCase()+line.slice(1)}:</span> ${builtCounts[line]} pieces, ${trainStock[line]} owned, ${activeCounts[line]||0} running</div>`).join('');
+    const linesHtml = lineKeys.map(line => `<div><span><span class="chip ${line}"></span>${line[0].toUpperCase()+line.slice(1)}:</span> ${builtCounts[line]} pieces, ${trainStock[line]} owned, ${activeCounts[line]} active</span></div>`).join('');
     statsEl.innerHTML = `
       <div><span>Money:</span> $${money.toFixed(0)}</div>
       <div><span>Worker income:</span> $${(workers*5).toFixed(0)}/sec</div>
