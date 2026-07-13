@@ -6,107 +6,198 @@
   <title>Train Management Sim — Smooth</title>
   <style>
     :root {
-      --bg: #11151a;
-      --panel: rgba(18,22,28,0.88);
-      --text: #eef3f8;
-      --muted: #a7b2bf;
-      --accent: #7fd4ff;
-      --danger: #ff6a6a;
+      --bg: #0a0e13;
+      --panel: rgba(12,16,24,0.92);
+      --text: #f0f4f9;
+      --muted: #8a94a6;
+      --accent: #64d5ff;
+      --accent-alt: #7fd4ff;
+      --danger: #ff5757;
+      --success: #4ade80;
+      --warning: #fbbf24;
     }
-    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; user-select:none; }
-    canvas { display:block; width:100vw; height:100vh; cursor:crosshair; background: linear-gradient(#c9e9ff,#eaf5ff 35%,#d6efc3 35%,#d6efc3); image-rendering:pixelated; }
+
+    * { box-sizing: border-box; }
+    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Segoe UI',Tahoma,sans-serif; user-select:none; }
+    canvas { display:block; width:100vw; height:100vh; cursor:crosshair; background: linear-gradient(#a8d8ff,#d8ecff 35%,#c8e6b8 35%,#c8e6b8); image-rendering:pixelated; }
     .hud { position:fixed; inset:0; pointer-events:none; }
-    .panel,.legend,.footer,.menu { position:absolute; background:var(--panel); border:1px solid rgba(255,255,255,0.12); border-radius:16px; backdrop-filter:blur(8px); box-shadow:0 10px 30px rgba(0,0,0,0.3); }
-    .panel { left:12px; top:52px; max-width:420px; padding:12px; pointer-events:auto; }
-    .legend { right:12px; top:12px; width:260px; padding:12px; pointer-events:none; font-size:13px; line-height:1.55; }
-    .footer { left:12px; bottom:12px; padding:10px 12px; pointer-events:none; max-width:760px; }
-    .menu { display:none; left:50%; top:50%; transform:translate(-50%,-50%); width:350px; padding:12px; pointer-events:auto; z-index:20; }
-    h1 { margin:0 0 8px 0; font-size:20px; }
+    .panel,.legend,.footer,.menu { position:absolute; background:var(--panel); border:1px solid rgba(255,255,255,0.1); border-radius:12px; backdrop-filter:blur(12px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+    .panel { left:12px; top:60px; max-width:380px; padding:16px; pointer-events:auto; }
+    .legend { right:12px; top:12px; width:280px; padding:12px; pointer-events:auto; font-size:12px; line-height:1.6; max-height:70vh; overflow-y:auto; }
+    .footer { left:12px; bottom:12px; padding:12px 16px; pointer-events:auto; max-width:800px; }
+    .menu { display:none; left:50%; top:50%; transform:translate(-50%,-50%); width:380px; padding:20px; pointer-events:auto; z-index:20; }
+    h1 { margin:0 0 12px 0; font-size:22px; font-weight:600; }
+    h2 { margin:8px 0 6px 0; font-size:14px; font-weight:600; color:var(--accent); }
     .row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
-    button { pointer-events:auto; border:0; border-radius:12px; padding:9px 11px; background:rgba(255,255,255,0.08); color:var(--text); font-weight:700; cursor:pointer; transition:transform .12s ease,background .12s ease; }
-    button:hover { transform:translateY(-1px); background:rgba(255,255,255,0.14); }
-    button.active { outline:2px solid var(--accent); background:rgba(127,212,255,0.14); }
-    button.danger.active { outline-color:var(--danger); background:rgba(255,106,106,0.12); }
-    button.small { padding:7px 10px; font-size:12px; }
-    .stats { font-size:13px; line-height:1.55; color:var(--text); }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+    .grid-item { display:flex; flex-direction:column; align-items:center; }
+
+    button { pointer-events:auto; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; background:rgba(255,255,255,0.05); color:var(--text); font-weight:600; font-size:13px; cursor:pointer; transition:all 0.15s ease; }
+    button:hover { transform:translateY(-2px); background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); }
+    button.active { outline:2px solid var(--accent); background:rgba(100,213,255,0.15); border-color:var(--accent); }
+    button.danger { border-color:rgba(255,87,87,0.3); }
+    button.danger.active { outline-color:var(--danger); background:rgba(255,87,87,0.15); border-color:var(--danger); }
+    button.small { padding:8px 10px; font-size:11px; }
+    button.icon { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 10px; min-height:60px; gap:4px; font-size:11px; }
+    button.icon:hover { background:rgba(255,255,255,0.12); }
+    button.icon.active { background:rgba(100,213,255,0.2); border-color:var(--accent); }
+
+    .stats { font-size:12px; line-height:1.7; color:var(--text); }
     .stats span { color:var(--muted); }
-    .chip { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:middle; margin-right:6px; }
-    .red { background:#f04c4c; } .blue { background:#4c8bf0; } .yellow { background:#f0d34c; } .muted { color:var(--muted); }
+    .stat-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .stat-row:last-child { border-bottom:none; }
+    .chip { display:inline-block; width:10px; height:10px; border-radius:2px; vertical-align:middle; margin-right:6px; }
+    .red { background:#ff5757; } .blue { background:#5b9fff; } .yellow { background:#ffd93d; } .green { background:#4ade80; }
+    .muted { color:var(--muted); }
+
     .menu-toggle {
-  position:absolute;
-  left:12px;
-  top:12px;
-  z-index:30;
-  pointer-events:auto;
+      position:absolute;
+      left:12px;
+      top:12px;
+      z-index:30;
+      pointer-events:auto;
+      width:40px;
+      height:40px;
+      padding:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(12,16,24,0.92);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px;
+      backdrop-filter:blur(12px);
+      color:var(--text);
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      transition:all 0.15s ease;
+    }
 
-  background:rgba(18,22,28,0.88);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:12px;
-  backdrop-filter:blur(8px);
+    .menu-toggle:hover {
+      transform:translateY(-2px);
+      background:rgba(255,255,255,0.08);
+      border-color:rgba(255,255,255,0.2);
+    }
 
-  padding:9px 14px;
-  color:var(--text);
-  font-weight:700;
-  cursor:pointer;
+    .menu-toggle::before {
+      content:attr(data-state);
+      font-size:18px;
+    }
 
-  box-shadow:0 10px 30px rgba(0,0,0,0.3);
-  transition:transform .12s ease, background .12s ease;
-}
+    .scroll { overflow-y:auto; }
+    .scroll::-webkit-scrollbar { width:6px; }
+    .scroll::-webkit-scrollbar-track { background:transparent; }
+    .scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+    .scroll::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.25); }
 
-.menu-toggle:hover {
-  transform:translateY(-1px);
-  background:rgba(255,255,255,0.14);
-}
+    .separator { height:1px; background:rgba(255,255,255,0.1); margin:8px 0; }
+    .badge { display:inline-block; background:var(--accent); color:var(--bg); padding:2px 6px; border-radius:3px; font-size:10px; font-weight:700; margin-left:4px; }
+    .badge.alert { background:var(--danger); }
+    .info-text { font-size:11px; color:var(--muted); margin:6px 0; line-height:1.5; }
   </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <div class="hud">
-<button id="toggle-build-menu" class="small menu-toggle">Hide Menu</button>
+  <button id="toggle-build-menu" class="menu-toggle" data-state="▼"></button>
 
-<div class="panel" id="build-menu">
-    <h1>Train Management Sim</h1>
-    <div class="row">
-      <button id="tool-straight" class="active">Straight Track</button>
-      <button id="tool-curve">Curve Track</button>
-      <button id="tool-station">Station</button>
-      <button id="tool-bridge">Bridge</button>
-      <button id="tool-delete" class="danger">Delete</button>
+  <div class="panel scroll" id="build-menu">
+    <h1>🚂 Train Tycoon</h1>
+    
+    <h2>Build Tools</h2>
+    <div class="grid">
+      <div class="grid-item">
+        <button id="tool-straight" class="icon active" title="Straight Track ($20)">
+          <span>━━</span>
+          <span style="font-size:10px;">Straight</span>
+        </button>
+      </div>
+      <div class="grid-item">
+        <button id="tool-curve" class="icon" title="Curve Track ($20)">
+          <span>⌐</span>
+          <span style="font-size:10px;">Curve</span>
+        </button>
+      </div>
+      <div class="grid-item">
+        <button id="tool-station" class="icon" title="Station ($30)">
+          <span>⬛</span>
+          <span style="font-size:10px;">Station</span>
+        </button>
+      </div>
+      <div class="grid-item">
+        <button id="tool-bridge" class="icon" title="Bridge ($80)">
+          <span>═══</span>
+          <span style="font-size:10px;">Bridge</span>
+        </button>
+      </div>
+      <div class="grid-item">
+        <button id="tool-delete" class="icon danger" title="Delete">
+          <span>✕</span>
+          <span style="font-size:10px;">Delete</span>
+        </button>
+      </div>
+      <div class="grid-item">
+        <button id="tool-signal" class="icon" title="Signal ($15)">
+          <span>🚦</span>
+          <span style="font-size:10px;">Signal</span>
+        </button>
+      </div>
     </div>
+
+    <div class="separator"></div>
+    <h2>Line Color</h2>
     <div class="row">
       <button id="line-red" class="active"><span class="chip red"></span>Red</button>
       <button id="line-blue"><span class="chip blue"></span>Blue</button>
       <button id="line-yellow"><span class="chip yellow"></span>Yellow</button>
-      <button id="rotate">Rotate (R)</button>
     </div>
+
+    <div class="separator"></div>
+    <h2>Options</h2>
     <div class="row">
-      <button id="hire-worker">Hire worker ($10)</button>
-      <button id="center">Center on factory</button>
+      <button id="rotate">Rotate (R)</button>
+      <button id="center">Center View</button>
     </div>
-    <div class="stats" id="stats"></div>
+
+    <div class="separator"></div>
+    <h2>Hiring</h2>
+    <button id="hire-worker" style="width:100%;">Hire Worker (+Income) <span class="badge">$10</span></button>
+
+    <div class="separator"></div>
+    <div class="stats" id="stats">
+      <div class="stat-row"><span>Money:</span> <span id="money-display">$150</span></div>
+      <div class="stat-row"><span>Income/sec:</span> <span id="income-display">$0</span></div>
+      <div class="stat-row"><span>Workers:</span> <span id="workers-display">0</span></div>
+      <div class="stat-row"><span>Trains Active:</span> <span id="trains-display">0</span></div>
+      <div class="stat-row"><span>Stations:</span> <span id="stations-display">0</span></div>
+    </div>
   </div>
 
   <div class="legend">
     <div><b>Controls</b></div>
-    <div>WASD: move camera</div>
-    <div>Mouse: aim build tile</div>
-    <div>Left click: place</div>
-    <div>Right click factory: train menu</div>
-    <div>R: rotate piece</div>
-    <div>1-5: tool shortcuts</div>
-    <div>Q / E: line color</div>
-    <div style="margin-top:8px; color: var(--muted);">Tracks cost $20. Bridges cost $80. Workers cost $10. Trains cost $100.</div>
+    <div>WASD: Pan camera</div>
+    <div>Mouse: Aim build</div>
+    <div>Left click: Place</div>
+    <div>Right click factory: Train menu</div>
+    <div>R: Rotate (90°)</div>
+    <div>1-5: Tool shortcuts</div>
+    <div>Q/E: Switch line color</div>
+    <div style="margin-top:12px;"><b>Costs</b></div>
+    <div>Track: $20 | Curve: $20</div>
+    <div>Station: $30 | Bridge: $80</div>
+    <div>Signal: $15 | Worker: $10</div>
+    <div>Train: $100</div>
   </div>
 
   <div class="footer" id="footer">Loading world...</div>
 
   <div id="factory-menu" class="menu">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
-      <div><b>Factory Menu</b></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:16px;">
+      <div><b>🏭 Factory Menu</b></div>
       <button id="close-factory-menu" class="small">Close</button>
     </div>
-    <div id="factory-menu-body" style="font-size:13px; line-height:1.6;"></div>
+    <div id="factory-menu-body" style="font-size:13px; line-height:1.8;"></div>
   </div>
 </div>
 
@@ -115,10 +206,9 @@
   // --- Config
   const TILE = 32, CHUNK = 16;
   const worldSeed = (Math.random()*1e9)|0;
-  // Cap devicePixelRatio to reduce GPU / CPU load on high-DPI displays
   const DPR = Math.min(window.devicePixelRatio || 1, 1.25);
 
-  // --- Canvas setup (use capped DPR)
+  // --- Canvas setup
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d', { alpha: false });
   ctx.imageSmoothingEnabled = false;
@@ -134,14 +224,14 @@
   resize();
 
   // --- State
-  const chunkMemory = new Map(); // key -> {cx,cy,tiles,canvas}
-  const builtObjects = new Map(); // "x,y" -> piece
-  const stations = new Map(); // "x,y" -> station
-  const trains = []; // each has x,y, prevX, prevY, ... for interpolation
+  const chunkMemory = new Map();
+  const builtObjects = new Map();
+  const stations = new Map();
+  const trains = [];
 
-  const lineColors = { red:'#f04c4c', blue:'#4c8bf0', yellow:'#f0d34c' };
+  const lineColors = { red:'#ff5757', blue:'#5b9fff', yellow:'#ffd93d' };
   const lineKeys = ['red','blue','yellow'];
-  const toolKeys = ['straight','curve','station','bridge','delete'];
+  const toolKeys = ['straight','curve','station','bridge','delete','signal'];
 
   const player = { x:0, y:0, speed:420 };
   const camera = { x:0, y:0 };
@@ -151,6 +241,8 @@
   let hoveredKey = null;
 
   const TRAIN_COST = 100;
+  const STATION_COST = 30;
+  const SIGNAL_COST = 15;
   const trainStock = { red:0, blue:0, yellow:0 };
   const builtCounts = { red:0, blue:0, yellow:0 };
 
@@ -175,7 +267,7 @@
     return lerp(lerp(a,b,tx), lerp(c,d,tx), ty);
   }
 
-  // --- Terrain & chunk rendering (offscreen canvases)
+  // --- Terrain
   function getTerrain(wx,wy) {
     if (wx === 0 && wy === 0) return 'factory';
     const riverCurve = Math.sin((wx + worldSeed * 0.001) * 0.055) * 15 + Math.sin((wx + 200) * 0.013) * 9;
@@ -201,29 +293,34 @@
   function keyFor(x,y){ return x + ',' + y; }
 
   function drawTileToChunk(ctx2, wx, wy, terrain, offX, offY) {
-    if (terrain === 'grass') ctx2.fillStyle = ((wx+wy)&1) ? '#cce8ab' : '#c2e09c';
-    else if (terrain==='road') ctx2.fillStyle = '#8d8d8d';
-    else if (terrain==='river') ctx2.fillStyle = '#5aa6ea';
-    else if (terrain==='pond') ctx2.fillStyle = '#4a95df';
-    else if (terrain==='tree') ctx2.fillStyle = '#b9df8d';
-    else if (terrain==='building') ctx2.fillStyle = '#bfb8ad';
-    else if (terrain==='factory') ctx2.fillStyle = '#8e949d';
+    const checker = (wx+wy)&1;
+    if (terrain === 'grass') ctx2.fillStyle = checker ? '#c0df8a' : '#b5d97f';
+    else if (terrain==='road') ctx2.fillStyle = '#7a7a7a';
+    else if (terrain==='river') ctx2.fillStyle = '#4a99d8';
+    else if (terrain==='pond') ctx2.fillStyle = '#3d88c7';
+    else if (terrain==='tree') ctx2.fillStyle = '#a8ce5f';
+    else if (terrain==='building') ctx2.fillStyle = '#a89878';
+    else if (terrain==='factory') ctx2.fillStyle = '#7a8291';
     else ctx2.fillStyle = '#cddc9f';
     ctx2.fillRect(offX, offY, TILE, TILE);
+
     if (terrain === 'tree') {
-      ctx2.fillStyle = '#2f6e2d'; ctx2.beginPath(); ctx2.arc(offX+16, offY+14, 8,0,Math.PI*2); ctx2.fill();
-      ctx2.fillStyle = '#7a552d'; ctx2.fillRect(offX+14, offY+19, 4, 9);
+      ctx2.fillStyle = '#2b5e24'; ctx2.beginPath(); ctx2.arc(offX+16, offY+14, 8,0,Math.PI*2); ctx2.fill();
+      ctx2.fillStyle = '#6d4c1f'; ctx2.fillRect(offX+14, offY+19, 4, 9);
     } else if (terrain === 'building') {
-      ctx2.fillStyle = '#8c8f99'; ctx2.fillRect(offX+5, offY+5, 22,22);
-      ctx2.fillStyle = '#d9dfeb'; ctx2.fillRect(offX+9,offY+9,4,4); ctx2.fillRect(offX+17,offY+9,4,4); ctx2.fillRect(offX+9,offY+17,4,4); ctx2.fillRect(offX+17,offY+17,4,4);
+      ctx2.fillStyle = '#7d7a70'; ctx2.fillRect(offX+4, offY+4, 24,24);
+      ctx2.fillStyle = '#c9c5b8'; ctx2.fillRect(offX+8,offY+8,4,4); ctx2.fillRect(offX+16,offY+8,4,4); ctx2.fillRect(offX+8,offY+16,4,4); ctx2.fillRect(offX+16,offY+16,4,4);
+      ctx2.fillStyle = '#5a5450'; ctx2.fillRect(offX+12, offY+12, 8, 8);
     } else if (terrain === 'road') {
-      ctx2.fillStyle = '#646464'; ctx2.fillRect(offX+14,offY,4,TILE); ctx2.fillRect(offX,offY+14,TILE,4);
+      ctx2.fillStyle = '#5a5a5a'; ctx2.fillRect(offX+13,offY,6,TILE); ctx2.fillRect(offX,offY+13,TILE,6);
+      ctx2.fillStyle = '#ffd966'; ctx2.fillRect(offX+14, offY+14, 4, 4);
     } else if (terrain === 'river' || terrain === 'pond') {
-      ctx2.fillStyle = 'rgba(255,255,255,0.18)'; ctx2.fillRect(offX+2,offY+2,5,2); ctx2.fillRect(offX+18,offY+14,6,2);
+      ctx2.fillStyle = 'rgba(255,255,255,0.2)'; ctx2.fillRect(offX+2,offY+2,5,2); ctx2.fillRect(offX+18,offY+14,6,2);
     } else if (terrain === 'factory') {
-      ctx2.fillStyle = '#70757f'; ctx2.fillRect(offX+2,offY+4,28,24);
-      ctx2.fillStyle='#4e535b'; ctx2.fillRect(offX+8,offY+10,8,8); ctx2.fillRect(offX+18,offY+10,6,8);
-      ctx2.fillStyle='#b5bcc5'; ctx2.fillRect(offX+26,offY-6,4,12); ctx2.fillRect(offX+21,offY-3,4,9);
+      ctx2.fillStyle = '#6a7180'; ctx2.fillRect(offX+1,offY+3,30,26);
+      ctx2.fillStyle='#4a525c'; ctx2.fillRect(offX+8,offY+10,8,8); ctx2.fillRect(offX+18,offY+10,6,8);
+      ctx2.fillStyle='#a8b1ba'; ctx2.fillRect(offX+26,offY-6,4,12); ctx2.fillRect(offX+21,offY-3,4,9);
+      ctx2.fillStyle='#ffd966'; ctx2.beginPath(); ctx2.arc(offX+16, offY+8, 3, 0, Math.PI*2); ctx2.fill();
     }
   }
 
@@ -267,111 +364,108 @@
   }
 
   // --- Pieces & connections
-  function canBuildOnTerrain(t, tool) { if (tool === 'bridge') return t === 'river' || t === 'pond'; return t !== 'river' && t !== 'pond'; }
+  function canBuildOnTerrain(t, tool) {
+    if (tool === 'bridge') return t === 'river' || t === 'pond';
+    if (tool === 'signal') return t !== 'river' && t !== 'pond' && t !== 'factory';
+    return t !== 'river' && t !== 'pond';
+  }
+
   function getConnections(piece) {
-  if (!piece) return [];
-
-  if (piece.type === 'straight' || piece.type === 'bridge') {
-    return (piece.rot & 1) === 0
-      ? [[1,0],[-1,0]]
-      : [[0,1],[0,-1]];
-  }
-
-  if (piece.type === 'curve') {
-    switch (piece.rot & 3) {
-      case 0:
-        return [[0,-1],[1,0]];
-
-      case 1:
-        return [[1,0],[0,1]];
-
-      case 2:
-        return [[0,1],[-1,0]];
-
-      case 3:
-        return [[-1,0],[0,-1]];
+    if (!piece) return [];
+    if (piece.type === 'straight' || piece.type === 'bridge') {
+      return (piece.rot & 1) === 0 ? [[1,0],[-1,0]] : [[0,1],[0,-1]];
     }
+    if (piece.type === 'curve') {
+      switch (piece.rot & 3) {
+        case 0: return [[0,-1],[1,0]];
+        case 1: return [[1,0],[0,1]];
+        case 2: return [[0,1],[-1,0]];
+        case 3: return [[-1,0],[0,-1]];
+      }
+    }
+    if (piece.type === 'station') return [[1,0],[-1,0],[0,1],[0,-1]];
+    return [];
   }
-
-  if (piece.type === 'station') {
-    return [[1,0],[-1,0],[0,1],[0,-1]];
-  }
-
-  return [];
-}
 
   function hasTrackWithinOneForLine(line) {
     const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
     for (const n of neighbors) {
       const piece = builtObjects.get(keyFor(n.dx, n.dy));
-      if (piece && piece.line === line) return true;
+      if (piece && piece.line === line && (piece.type === 'straight' || piece.type === 'curve' || piece.type === 'bridge' || piece.type === 'station')) return true;
     }
     return false;
   }
 
-function getTrackExitForLine(line) {
-  const neighbors = [
-    {dx:1,dy:0},
-    {dx:-1,dy:0},
-    {dx:0,dy:1},
-    {dx:0,dy:-1}
-  ];
-
-  for (const n of neighbors) {
-    const piece = builtObjects.get(keyFor(n.dx, n.dy));
-
-    if (!piece || piece.line !== line) continue;
-
-    // Ignore track rotation completely.
-    // Any adjacent track becomes a valid spawn point.
-    return {
-      tx: n.dx,
-      ty: n.dy,
-      dx: n.dx,
-      dy: n.dy
-    };
+  function getTrackExitForLine(line) {
+    const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+    for (const n of neighbors) {
+      const piece = builtObjects.get(keyFor(n.dx, n.dy));
+      if (!piece || piece.line !== line) continue;
+      if (piece.type === 'straight' || piece.type === 'curve' || piece.type === 'bridge' || piece.type === 'station') {
+        return { tx: n.dx, ty: n.dy, dx: n.dx, dy: n.dy };
+      }
+    }
+    return null;
   }
 
-  return null;
-}
-
-  // --- UI wiring & helpers
+  // --- UI helpers
   const statsEl = document.getElementById('stats');
   const footerEl = document.getElementById('footer');
   const factoryMenu = document.getElementById('factory-menu');
   const factoryMenuBody = document.getElementById('factory-menu-body');
+  const buildMenuEl = document.getElementById('build-menu');
+  const toggleBuildMenu = document.getElementById('toggle-build-menu');
 
   function flash(text) {
     footerEl.textContent = text; footerEl.style.opacity = '1';
-    clearTimeout(flash._t); flash._t = setTimeout(()=>{ footerEl.style.opacity = '0.85'; }, 1200);
+    clearTimeout(flash._t); flash._t = setTimeout(()=>{ footerEl.style.opacity = '0.7'; }, 1400);
   }
 
   function refreshButtons() {
-    for (const k of toolKeys) { const btn=document.getElementById('tool-'+k); if (btn) btn.classList.toggle('active', selectedTool===k); }
-    for (const k of lineKeys) { const btn=document.getElementById('line-'+k); if (btn) btn.classList.toggle('active', selectedLine===k); }
+    for (const k of toolKeys) {
+      const btn=document.getElementById('tool-'+k);
+      if (btn) btn.classList.toggle('active', selectedTool===k);
+    }
+    for (const k of lineKeys) {
+      const btn=document.getElementById('line-'+k);
+      if (btn) btn.classList.toggle('active', selectedLine===k);
+    }
   }
 
-  // --- Build / delete / factory menu
+  function updateStatsDisplay() {
+    const activeCounts = { red:0, blue:0, yellow:0 };
+    for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line]||0) + 1;
+    document.getElementById('money-display').textContent = '$' + money.toFixed(0);
+    document.getElementById('income-display').textContent = '$' + (workers*5).toFixed(0);
+    document.getElementById('workers-display').textContent = workers;
+    document.getElementById('trains-display').textContent = activeCounts.red + activeCounts.blue + activeCounts.yellow;
+    document.getElementById('stations-display').textContent = stations.size;
+  }
+
+  // --- Factory Menu
   function renderFactoryMenu() {
+    const trainsCost = TRAIN_COST;
     factoryMenuBody.innerHTML = `
-      <div style="margin-bottom:10px; color:#cfd8e3;">Buy trains here, then deploy them onto a track next to the factory.</div>
-      <div style="margin-bottom:8px;"><b>Owned trains</b></div>
-      <div>Red: ${trainStock.red}</div>
-      <div>Blue: ${trainStock.blue}</div>
-      <div>Yellow: ${trainStock.yellow}</div>
-      <div style="margin:10px 0 8px;"><b>Buy trains</b></div>
-      <div class="row" style="pointer-events:auto; margin-bottom:10px;">
-        <button class="small" data-buy="red">Buy Red ($${TRAIN_COST})</button>
-        <button class="small" data-buy="blue">Buy Blue ($${TRAIN_COST})</button>
-        <button class="small" data-buy="yellow">Buy Yellow ($${TRAIN_COST})</button>
+      <div style="margin-bottom:12px; color:#a8b8c8; font-size:12px;">Buy trains, then deploy them on adjacent track.</div>
+      <div style="margin-bottom:8px;"><b>📦 Owned Trains</b></div>
+      <div style="margin-bottom:8px; font-size:12px;">
+        <div>🔴 Red: <b>${trainStock.red}</b></div>
+        <div>🔵 Blue: <b>${trainStock.blue}</b></div>
+        <div>🟡 Yellow: <b>${trainStock.yellow}</b></div>
       </div>
-      <div style="margin:10px 0 8px;"><b>Deploy trains</b></div>
+      <div style="margin:12px 0 8px;"><b>💳 Buy Trains</b></div>
+      <div class="row" style="pointer-events:auto; margin-bottom:12px;">
+        <button class="small" data-buy="red">Red ($${trainsCost})</button>
+        <button class="small" data-buy="blue">Blue ($${trainsCost})</button>
+        <button class="small" data-buy="yellow">Yellow ($${trainsCost})</button>
+      </div>
+      <div style="margin:12px 0 8px;"><b>🚀 Deploy Trains</b></div>
       <div class="row" style="pointer-events:auto;">
-        <button class="small" data-deploy="red">Deploy Red</button>
-        <button class="small" data-deploy="blue">Deploy Blue</button>
-        <button class="small" data-deploy="yellow">Deploy Yellow</button>
+        <button class="small" data-deploy="red">Red</button>
+        <button class="small" data-deploy="blue">Blue</button>
+        <button class="small" data-deploy="yellow">Yellow</button>
       </div>
-      <div style="margin-top:8px; color:#a7b2bf;">A train can only leave the factory if there is a track tile next to it.</div>
+      <div style="margin-top:10px; color:#8a94a6; font-size:11px; line-height:1.6;">Track must be adjacent to factory.</div>
     `;
     factoryMenuBody.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyTrain(b.dataset.buy));
     factoryMenuBody.querySelectorAll('[data-deploy]').forEach(b=>b.onclick=()=>deployTrain(b.dataset.deploy));
@@ -381,7 +475,7 @@ function getTrackExitForLine(line) {
 
   function buyTrain(line) {
     if (money < TRAIN_COST) return flash('Not enough money');
-    money -= TRAIN_COST; trainStock[line] += 1; renderFactoryMenu(); flash(`Bought a ${line} train`);
+    money -= TRAIN_COST; trainStock[line] += 1; renderFactoryMenu(); updateStatsDisplay(); flash(`Bought a ${line} train`);
   }
 
   function placeObject(wx,wy) {
@@ -391,22 +485,30 @@ function getTrackExitForLine(line) {
       const obj = builtObjects.get(k);
       if (obj) {
         if (obj.type === 'station') stations.delete(k);
-        money += obj.cost || (obj.type === 'bridge' ? 80 : 20);
+        money += obj.cost || 20;
         builtObjects.delete(k);
         if (builtCounts[obj.line] !== undefined) builtCounts[obj.line] = Math.max(0, builtCounts[obj.line]-1);
+        updateStatsDisplay();
         flash('Tile deleted and refunded');
       } else flash('Nothing to delete');
       return;
     }
-    const cost = selectedTool === 'bridge' ? 80 : 20;
+
+    let cost = 20;
+    if (selectedTool === 'bridge') cost = 80;
+    else if (selectedTool === 'station') cost = STATION_COST;
+    else if (selectedTool === 'signal') cost = SIGNAL_COST;
+
     if (money < cost) return flash('Not enough money');
     if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can\'t build here');
     if (builtObjects.has(k)) return flash('Tile already used');
+
     const piece = { type:selectedTool, rot:rotation&3, line:selectedLine, cost };
     builtObjects.set(k, piece);
     if (piece.type === 'station') stations.set(k, { waiting:0, line:selectedLine });
     money -= cost;
     if (builtCounts[selectedLine] !== undefined) builtCounts[selectedLine] += 1;
+    updateStatsDisplay();
     flash(`${piece.type} built for $${cost}`);
   }
 
@@ -414,15 +516,13 @@ function getTrackExitForLine(line) {
     if (trainStock[line] <= 0) return flash(`No ${line} trains owned`);
     if (!hasTrackWithinOneForLine(line)) return flash('Put a track next to the factory first');
     const start = getTrackExitForLine(line);
-    const trainDirX = start.dx;
-    const trainDirY = start.dy;
     if (!start) return flash('No track found next to the factory');
     trainStock[line] -= 1;
     const t = {
       deployed:true, line,
       x:0, y:0, prevX:0, prevY:0,
       fromX:0, fromY:0, toX:start.tx, toY:start.ty,
-      dirX:trainDirX, dirY:trainDirY,
+      dirX:start.dx, dirY:start.dy,
       speed:72, targetSpeed:72,
       angle:Math.atan2(start.dy,start.dx),
       capacity:10, load:0, paused:0,
@@ -430,10 +530,10 @@ function getTrackExitForLine(line) {
       nearbyStations: new Set()
     };
     trains.push(t);
-    renderFactoryMenu(); flash(`Deployed a ${line} train`);
+    renderFactoryMenu(); updateStatsDisplay(); flash(`Deployed a ${line} train`);
   }
 
-  // --- Train pathing (fixed)
+  // --- Train pathing
   function chooseNextDir(train, wx, wy) {
     const piece = builtObjects.get(keyFor(wx,wy));
     if (!piece || piece.line !== train.line) return null;
@@ -450,7 +550,8 @@ function getTrackExitForLine(line) {
   }
 
   function boardPassengers(train, wx, wy, dt) {
-    const st = stations.get(keyFor(wx,wy)); if (!st) return;
+    const st = stations.get(keyFor(wx,wy));
+    if (!st) return;
     st.waiting += (1.2 + workers*0.25) * dt;
     const canBoard = Math.max(0, train.capacity - train.load);
     const boarded = Math.min(canBoard, Math.floor(st.waiting));
@@ -458,10 +559,14 @@ function getTrackExitForLine(line) {
       st.waiting -= boarded; train.load += boarded;
       const fare = boarded * (2 + workers*0.1);
       money += fare; train.paused = 0.15;
-      flash(`${boarded} passengers boarded the ${train.line} line (+$${fare.toFixed(0)})`);
+      updateStatsDisplay();
+      flash(`${boarded} passengers boarded (+$${fare.toFixed(0)})`);
     }
   }
-  function unloadMaybe(train, wx, wy) { if (stations.has(keyFor(wx,wy)) && train.load>0) train.load = 0; }
+
+  function unloadMaybe(train, wx, wy) {
+    if (stations.has(keyFor(wx,wy)) && train.load>0) train.load = 0;
+  }
 
   function resolveTrainMotion(train, dt) {
     if (!train.deployed) return;
@@ -493,7 +598,8 @@ function getTrackExitForLine(line) {
         money += amount;
         train.nearbyStations = train.nearbyStations || new Set();
         for (const k of newlyAdjacent) train.nearbyStations.add(k);
-        flash(`Train passed ${newlyAdjacent.length > 1 ? 'stations' : 'a station'}: +$${amount}`);
+        updateStatsDisplay();
+        flash(`Passed station: +$${amount}`);
       }
       const currentAdj = new Set();
       for (const n of neighbors) {
@@ -503,7 +609,7 @@ function getTrackExitForLine(line) {
       train.nearbyStations = currentAdj;
 
       const piece = builtObjects.get(keyFor(train.toX, train.toY));
-      if (!piece || piece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped: track ended.`); return; }
+      if (!piece || piece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped.`); return; }
       boardPassengers(train, train.toX, train.toY, dt);
       unloadMaybe(train, train.toX, train.toY);
 
@@ -511,7 +617,7 @@ function getTrackExitForLine(line) {
       if (!next) {
         const reverse = [-train.dirX, -train.dirY];
         const reversePiece = builtObjects.get(keyFor(train.toX + reverse[0], train.toY + reverse[1]));
-        if (!reversePiece || reversePiece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped: no track to continue.`); return; }
+        if (!reversePiece || reversePiece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped.`); return; }
         train.dirX = reverse[0]; train.dirY = reverse[1];
       } else {
         train.dirX = next[0]; train.dirY = next[1];
@@ -531,7 +637,9 @@ function getTrackExitForLine(line) {
     const nx = dx / dist, ny = dy / dist, impulse = 180;
     a.vx = -nx * impulse; a.vy = -ny * impulse; b.vx = nx * impulse; b.vy = ny * impulse;
     a.crashed = b.crashed = true; a.crashT = b.crashT = 2.2; a.load = 0; b.load = 0;
-    money = Math.max(0, money - 15); flash('Train crash! Different lines collided.');
+    money = Math.max(0, money - 15);
+    updateStatsDisplay();
+    flash('💥 Train crash!');
   }
 
   function updateCollisions() {
@@ -563,15 +671,23 @@ function getTrackExitForLine(line) {
     }
   }
 
-  function updateStations(dt) { for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers*0.12) * dt); }
-  function updateEconomy(dt) { money += workers * 5 * dt; }
+  function updateStations(dt) {
+    for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers*0.12) * dt);
+  }
+
+  function updateEconomy(dt) {
+    money += workers * 5 * dt;
+  }
+
   function updatePlayer(dt) {
     const up = keys.has('KeyW') || keys.has('ArrowUp'), down = keys.has('KeyS') || keys.has('ArrowDown');
     const left = keys.has('KeyA') || keys.has('ArrowLeft'), right = keys.has('KeyD') || keys.has('ArrowRight');
-    let dx=0, dy=0; if (up) dy-=1; if (down) dy+=1; if (left) dx-=1; if (right) dx+=1;
+    let dx=0, dy=0;
+    if (up) dy-=1; if (down) dy+=1; if (left) dx-=1; if (right) dx+=1;
     const len = Math.hypot(dx,dy) || 1;
     player.x += (dx/len) * player.speed * dt; player.y += (dy/len) * player.speed * dt;
   }
+
   function updateCamera() { camera.x = player.x; camera.y = player.y; }
 
   function worldToScreenX(wx) { return wx - camera.x + window.innerWidth/2; }
@@ -592,9 +708,15 @@ function getTrackExitForLine(line) {
       const sx = worldToScreenX(wx * TILE), sy = worldToScreenY(wy * TILE);
       const color = lineColors[obj.line]; const cx = sx + TILE/2, cy = sy + TILE/2;
       ctx.save(); ctx.translate(cx,cy); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap='round'; ctx.lineJoin='round';
+
       if (obj.type === 'station') {
-        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.85; ctx.fillRect(-11,-11,22,22); ctx.globalAlpha = 1;
-        ctx.strokeRect(-12,-12,24,24); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.9; ctx.fillRect(-11,-11,22,22); ctx.globalAlpha = 1;
+        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.strokeRect(-12,-12,24,24); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
+      } else if (obj.type === 'signal') {
+        ctx.fillStyle = '#333'; ctx.fillRect(-6,-10,12,20);
+        ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(0,-4,3,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#ffdd44'; ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#44ff44'; ctx.beginPath(); ctx.arc(0,4,3,0,Math.PI*2); ctx.fill();
       } else if (obj.type === 'bridge') {
         ctx.strokeStyle = '#6d4f2f'; ctx.lineWidth = 6;
         if ((obj.rot & 1) === 0) { ctx.beginPath(); ctx.moveTo(-14,0); ctx.lineTo(14,0); ctx.stroke(); }
@@ -610,9 +732,19 @@ function getTrackExitForLine(line) {
         ctx.stroke();
       } else if (obj.type === 'curve') {
         ctx.lineWidth = 6; ctx.beginPath();
-        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-14); ctx.quadraticCurveTo(0,0,14,0); break; case 1: ctx.moveTo(14,0); ctx.quadraticCurveTo(0,0,0,14); break; case 2: ctx.moveTo(0,14); ctx.quadraticCurveTo(0,0,-14,0); break; default: ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,0,0,-14); }
+        switch (obj.rot & 3) {
+          case 0: ctx.moveTo(0,-14); ctx.quadraticCurveTo(0,0,14,0); break;
+          case 1: ctx.moveTo(14,0); ctx.quadraticCurveTo(0,0,0,14); break;
+          case 2: ctx.moveTo(0,14); ctx.quadraticCurveTo(0,0,-14,0); break;
+          case 3: ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,0,0,-14); break;
+        }
         ctx.stroke(); ctx.lineWidth = 3; ctx.beginPath();
-        switch (obj.rot & 3) { case 0: ctx.moveTo(0,-10); ctx.quadraticCurveTo(0,0,10,0); break; case 1: ctx.moveTo(10,0); ctx.quadraticCurveTo(0,0,0,10); break; case 2: ctx.moveTo(0,10); ctx.quadraticCurveTo(0,0,-10,0); break; default: ctx.moveTo(-10,0); ctx.quadraticCurveTo(0,0,0,-10); }
+        switch (obj.rot & 3) {
+          case 0: ctx.moveTo(0,-10); ctx.quadraticCurveTo(0,0,10,0); break;
+          case 1: ctx.moveTo(10,0); ctx.quadraticCurveTo(0,0,0,10); break;
+          case 2: ctx.moveTo(0,10); ctx.quadraticCurveTo(0,0,-10,0); break;
+          case 3: ctx.moveTo(-10,0); ctx.quadraticCurveTo(0,0,0,-10); break;
+        }
         ctx.stroke();
       }
       ctx.restore();
@@ -624,17 +756,29 @@ function getTrackExitForLine(line) {
       const rx = lerp(t.prevX, t.x, alpha), ry = lerp(t.prevY, t.y, alpha);
       const pX = worldToScreenX(rx), pY = worldToScreenY(ry);
       ctx.save(); ctx.translate(pX, pY); ctx.rotate(t.angle);
-      ctx.fillStyle = t.crashed ? '#ff9b33' : t.color;
-      ctx.fillRect(-14,-9,28,18); ctx.fillStyle='#e8edf3'; ctx.fillRect(-10,-6,10,6); ctx.fillRect(2,-6,8,6);
-      ctx.fillStyle='#20262c'; ctx.fillRect(-11,8,22,2); ctx.fillStyle='#111'; ctx.fillRect(-12,-10,5,20); ctx.fillRect(7,-10,5,20);
-      if (t.load > 0) { ctx.fillStyle='#fff'; ctx.font='10px Arial'; ctx.fillText(String(t.load), -4, -13); }
-      if (t.crashed) { ctx.strokeStyle='#ff2e2e'; ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.stroke(); }
+
+      if (t.crashed) ctx.fillStyle = '#ff9b33';
+      else ctx.fillStyle = t.color;
+      ctx.fillRect(-14,-9,28,18);
+      ctx.fillStyle='#dfe5ed'; ctx.fillRect(-10,-6,10,6); ctx.fillRect(2,-6,8,6);
+      ctx.fillStyle='#1a1f27'; ctx.fillRect(-11,8,22,2);
+      ctx.fillStyle='#000'; ctx.fillRect(-12,-10,5,20); ctx.fillRect(7,-10,5,20);
+
+      if (t.load > 0) {
+        ctx.fillStyle='#fff'; ctx.font='bold 9px Arial'; ctx.textAlign='center';
+        ctx.fillText(String(t.load), 0, -13);
+      }
+
+      if (t.crashed) {
+        ctx.strokeStyle='#ff2e2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.stroke();
+      }
+
       ctx.restore();
     }
   }
 
   function drawGridOverlay(minX,minY,maxX,maxY) {
-    ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 1;
     for (let x=minX; x<=maxX; x+=2) { const sx = worldToScreenX(x*TILE); ctx.beginPath(); ctx.moveTo(sx,0); ctx.lineTo(sx,window.innerHeight); ctx.stroke(); }
     for (let y=minY; y<=maxY; y+=2) { const sy = worldToScreenY(y*TILE); ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(window.innerWidth,sy); ctx.stroke(); }
   }
@@ -642,47 +786,39 @@ function getTrackExitForLine(line) {
   function drawHover() {
     const sx = worldToScreenX(mouse.tileX * TILE), sy = worldToScreenY(mouse.tileY * TILE);
     ctx.save(); ctx.translate(sx, sy);
+
     if (selectedTool !== 'delete') {
-      ctx.strokeStyle = money >= (selectedTool==='bridge'?80:20) ? 'rgba(255,255,255,0.9)' : 'rgba(255,90,90,0.9)';
+      const canAfford = money >= (selectedTool==='bridge'?80:(selectedTool==='station'?STATION_COST:(selectedTool==='signal'?SIGNAL_COST:20)));
+      ctx.strokeStyle = canAfford ? 'rgba(100,213,255,0.8)' : 'rgba(255,87,87,0.8)';
       ctx.lineWidth = 2; ctx.strokeRect(1,1,TILE-2,TILE-2);
-      ctx.fillStyle = lineColors[selectedLine]; ctx.globalAlpha = 0.35;
-      if (selectedTool === 'straight' || selectedTool === 'bridge') { const h=(rotation&1)===0; if (h) ctx.fillRect(2,14,28,4); else ctx.fillRect(14,2,4,28); }
-else if (selectedTool === 'curve') {
-  ctx.strokeStyle=lineColors[selectedLine];
-  ctx.lineWidth=5;
-  ctx.lineCap='round';
-  ctx.beginPath();
+      ctx.fillStyle = lineColors[selectedLine]; ctx.globalAlpha = 0.3;
 
-  switch(rotation&3){
-    case 0: ctx.moveTo(16,2); ctx.quadraticCurveTo(16,16,30,16); break;
-    case 1: ctx.moveTo(30,16); ctx.quadraticCurveTo(16,16,16,30); break;
-    case 2: ctx.moveTo(16,30); ctx.quadraticCurveTo(16,16,2,16); break;
-    case 3: ctx.moveTo(2,16); ctx.quadraticCurveTo(16,16,16,2); break;
-  }
-
-  ctx.stroke();
-}
-       else if (selectedTool === 'station') ctx.fillRect(6,6,20,20);
+      if (selectedTool === 'straight' || selectedTool === 'bridge') {
+        const h=(rotation&1)===0;
+        if (h) ctx.fillRect(2,14,28,4); else ctx.fillRect(14,2,4,28);
+      } else if (selectedTool === 'curve') {
+        ctx.strokeStyle=lineColors[selectedLine];
+        ctx.lineWidth=4;
+        ctx.lineCap='round';
+        ctx.beginPath();
+        switch(rotation&3){
+          case 0: ctx.moveTo(16,2); ctx.quadraticCurveTo(16,16,30,16); break;
+          case 1: ctx.moveTo(30,16); ctx.quadraticCurveTo(16,16,16,30); break;
+          case 2: ctx.moveTo(16,30); ctx.quadraticCurveTo(16,16,2,16); break;
+          case 3: ctx.moveTo(2,16); ctx.quadraticCurveTo(16,16,16,2); break;
+        }
+        ctx.stroke();
+      } else if (selectedTool === 'station') {
+        ctx.fillRect(6,6,20,20);
+      } else if (selectedTool === 'signal') {
+        ctx.fillStyle = '#333'; ctx.globalAlpha = 0.5; ctx.fillRect(-6,-10,12,20);
+      }
       ctx.globalAlpha = 1;
-    } else { ctx.strokeStyle='rgba(255,80,80,0.95)'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(4,4); ctx.lineTo(28,28); ctx.moveTo(28,4); ctx.lineTo(4,28); ctx.stroke(); }
+    } else {
+      ctx.strokeStyle='rgba(255,87,87,0.8)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.moveTo(4,4); ctx.lineTo(28,28); ctx.moveTo(28,4); ctx.lineTo(4,28); ctx.stroke();
+    }
     ctx.restore();
-  }
-
-  function updateStats() {
-    const activeCounts = { red:0, blue:0, yellow:0 };
-    for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line]||0) + 1;
-    const linesHtml = lineKeys.map(line => `<div><span><span class="chip ${line}"></span>${line[0].toUpperCase()+line.slice(1)}:</span> ${builtCounts[line]} pieces, ${trainStock[line]} owned, ${activeCounts[line]} active</div>`).join('');
-    statsEl.innerHTML = `
-      <div><span>Money:</span> $${money.toFixed(0)}</div>
-      <div><span>Worker income:</span> $${(workers*5).toFixed(0)}/sec</div>
-      <div><span>Workers:</span> ${workers}</div>
-      <div><span>Selected:</span> ${selectedTool} / ${selectedLine} / ${rotation*90}°</div>
-      <div><span>Chunks cached:</span> ${chunkMemory.size}</div>
-      <div><span>Built tiles:</span> ${builtObjects.size}</div>
-      <div><span>Stations:</span> ${stations.size}</div>
-      <div style="margin-top:6px;"><b>Lines</b></div>
-      ${linesHtml}
-    `;
   }
 
   const physicsStep = 1/60;
@@ -708,7 +844,7 @@ else if (selectedTool === 'curve') {
     const minX = Math.floor((camera.x - W/2) / TILE) - 2, maxX = Math.floor((camera.x + W/2) / TILE) + 2;
     const minY = Math.floor((camera.y - H/2) / TILE) - 2, maxY = Math.floor((camera.y + H/2) / TILE) + 2;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0,0,W,H);
 
     const cminCX = Math.floor(minX/CHUNK), cmaxCX = Math.floor(maxX/CHUNK);
     const cminCY = Math.floor(minY/CHUNK), cmaxCY = Math.floor(maxY/CHUNK);
@@ -728,15 +864,15 @@ else if (selectedTool === 'curve') {
 
     const fX = worldToScreenX(0), fY = worldToScreenY(0);
     if (fX > -80 && fX < W + 80 && fY > -80 && fY < H + 80) {
-      ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(fX - 44, fY - 36, 88, 18);
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Arial'; ctx.fillText('Factory', fX - 22, fY - 23);
+      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(fX - 48, fY - 38, 96, 20);
+      ctx.fillStyle = '#ffd93d'; ctx.font = 'bold 13px Arial'; ctx.textAlign='center'; ctx.fillText('🏭 Factory', fX, fY - 24);
     }
 
     const terrain = getTerrainAt(mouse.tileX, mouse.tileY);
     const piece = builtObjects.get(hoveredKey);
-    footerEl.textContent = piece ? `Tile ${mouse.tileX}, ${mouse.tileY} | ${piece.type} (${piece.line})` : `Tile ${mouse.tileX}, ${mouse.tileY} | Terrain: ${terrain} | Click to build`;
+    footerEl.textContent = piece ? `[${mouse.tileX},${mouse.tileY}] ${piece.type.toUpperCase()} (${piece.line})` : `[${mouse.tileX},${mouse.tileY}] ${terrain} | Click to build`;
 
-    updateStats();
+    updateStatsDisplay();
   }
 
   function loop() {
@@ -766,8 +902,11 @@ else if (selectedTool === 'curve') {
     mouse.worldX = wx; mouse.worldY = wy; mouse.tileX = Math.floor(wx / TILE); mouse.tileY = Math.floor(wy / TILE);
     hoveredKey = keyFor(mouse.tileX, mouse.tileY);
   }
+
   canvas.addEventListener('mousemove', updateMouse);
-  canvas.addEventListener('mousedown', ev => { if (ev.button === 0) placeObject(mouse.tileX, mouse.tileY); });
+  canvas.addEventListener('mousedown', ev => {
+    if (ev.button === 0) placeObject(mouse.tileX, mouse.tileY);
+  });
   canvas.addEventListener('contextmenu', ev => {
     ev.preventDefault();
     const rect = canvas.getBoundingClientRect();
@@ -785,42 +924,51 @@ else if (selectedTool === 'curve') {
     if (e.code === 'Digit3') { selectedTool='station'; refreshButtons(); }
     if (e.code === 'Digit4') { selectedTool='bridge'; refreshButtons(); }
     if (e.code === 'Digit5') { selectedTool='delete'; refreshButtons(); }
+    if (e.code === 'Digit6') { selectedTool='signal'; refreshButtons(); }
     if (e.code === 'KeyQ') { selectedLine = lineKeys[(lineKeys.indexOf(selectedLine)+2)%3]; refreshButtons(); }
     if (e.code === 'KeyE') { selectedLine = lineKeys[(lineKeys.indexOf(selectedLine)+1)%3]; refreshButtons(); }
   });
   window.addEventListener('keyup', e => keys.delete(e.code));
 
+  // Tool button events
   document.getElementById('tool-straight').addEventListener('click', ()=>{ selectedTool='straight'; refreshButtons(); });
   document.getElementById('tool-curve').addEventListener('click', ()=>{ selectedTool='curve'; refreshButtons(); });
   document.getElementById('tool-station').addEventListener('click', ()=>{ selectedTool='station'; refreshButtons(); });
   document.getElementById('tool-bridge').addEventListener('click', ()=>{ selectedTool='bridge'; refreshButtons(); });
   document.getElementById('tool-delete').addEventListener('click', ()=>{ selectedTool='delete'; refreshButtons(); });
+  document.getElementById('tool-signal').addEventListener('click', ()=>{ selectedTool='signal'; refreshButtons(); });
+
+  // Line color events
   document.getElementById('line-red').addEventListener('click', ()=>{ selectedLine='red'; refreshButtons(); });
   document.getElementById('line-blue').addEventListener('click', ()=>{ selectedLine='blue'; refreshButtons(); });
   document.getElementById('line-yellow').addEventListener('click', ()=>{ selectedLine='yellow'; refreshButtons(); });
+
+  // Other button events
   document.getElementById('rotate').addEventListener('click', ()=>{ rotation = (rotation+1)&3; flash(`Rotated to ${rotation*90}°`); });
-  document.getElementById('hire-worker').addEventListener('click', ()=>{ if (money < 10) return flash('Not enough money'); money -= 10; workers += 1; flash('Hired a worker'); });
+  document.getElementById('hire-worker').addEventListener('click', ()=>{
+    if (money < 10) return flash('Not enough money');
+    money -= 10; workers += 1; updateStatsDisplay(); flash('Hired a worker');
+  });
   document.getElementById('center').addEventListener('click', ()=>{ player.x = 0; player.y = 0; camera.x = 0; camera.y = 0; });
-  const buildMenu = document.getElementById('build-menu');
-const toggleBuildMenu = document.getElementById('toggle-build-menu');
 
-let buildMenuHidden = false;
+  // Menu toggle
+  let buildMenuHidden = false;
+  toggleBuildMenu.addEventListener('click', () => {
+    buildMenuHidden = !buildMenuHidden;
+    if (buildMenuHidden) {
+      buildMenuEl.style.display = "none";
+      toggleBuildMenu.setAttribute('data-state', '▶');
+    } else {
+      buildMenuEl.style.display = "block";
+      toggleBuildMenu.setAttribute('data-state', '▼');
+    }
+  });
 
-toggleBuildMenu.addEventListener('click', () => {
-  buildMenuHidden = !buildMenuHidden;
-
-  if (buildMenuHidden) {
-    buildMenu.style.display = "none";
-    toggleBuildMenu.textContent = "Show Menu";
-  } else {
-    buildMenu.style.display = "block";
-    toggleBuildMenu.textContent = "Hide Menu";
-  }
-});
   document.getElementById('close-factory-menu').addEventListener('click', hideFactoryMenu);
 
   refreshButtons();
-  flash('Build a line from the factory at the center. Right-click the factory to buy and deploy trains.');
+  updateStatsDisplay();
+  flash('🚂 Build a line from the factory. Right-click factory to buy trains.');
   requestAnimationFrame(loop);
 })();
 </script>
