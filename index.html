@@ -7,197 +7,510 @@
   <style>
     :root {
       --bg: #0a0e13;
-      --panel: rgba(12,16,24,0.92);
-      --text: #f0f4f9;
-      --muted: #8a94a6;
-      --accent: #64d5ff;
-      --accent-alt: #7fd4ff;
-      --danger: #ff5757;
-      --success: #4ade80;
-      --warning: #fbbf24;
+      --bg-secondary: #1a1f2e;
+      --panel: rgba(15,18,28,0.92);
+      --text: #e8f0f8;
+      --text-muted: #8b94a8;
+      --accent: #00d4ff;
+      --accent-hover: #00e8ff;
+      --danger: #ff5a5a;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --red-line: #ff6b6b;
+      --blue-line: #4ecdc4;
+      --yellow-line: #ffd93d;
     }
 
     * { box-sizing: border-box; }
-    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Segoe UI',Tahoma,sans-serif; user-select:none; }
-    canvas { display:block; width:100vw; height:100vh; cursor:crosshair; background: linear-gradient(#a8d8ff,#d8ecff 35%,#c8e6b8 35%,#c8e6b8); image-rendering:pixelated; }
-    .hud { position:fixed; inset:0; pointer-events:none; }
-    .panel,.legend,.footer,.menu { position:absolute; background:var(--panel); border:1px solid rgba(255,255,255,0.1); border-radius:12px; backdrop-filter:blur(12px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
-    .panel { left:12px; top:60px; max-width:380px; padding:16px; pointer-events:auto; }
-    .legend { right:12px; top:12px; width:280px; padding:12px; pointer-events:auto; font-size:12px; line-height:1.6; max-height:70vh; overflow-y:auto; }
-    .footer { left:12px; bottom:12px; padding:12px 16px; pointer-events:auto; max-width:800px; }
-    .menu { display:none; left:50%; top:50%; transform:translate(-50%,-50%); width:380px; padding:20px; pointer-events:auto; z-index:20; }
-    h1 { margin:0 0 12px 0; font-size:22px; font-weight:600; }
-    h2 { margin:8px 0 6px 0; font-size:14px; font-weight:600; color:var(--accent); }
-    .row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
-    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
-    .grid-item { display:flex; flex-direction:column; align-items:center; }
-
-    button { pointer-events:auto; border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; background:rgba(255,255,255,0.05); color:var(--text); font-weight:600; font-size:13px; cursor:pointer; transition:all 0.15s ease; }
-    button:hover { transform:translateY(-2px); background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25); }
-    button.active { outline:2px solid var(--accent); background:rgba(100,213,255,0.15); border-color:var(--accent); }
-    button.danger { border-color:rgba(255,87,87,0.3); }
-    button.danger.active { outline-color:var(--danger); background:rgba(255,87,87,0.15); border-color:var(--danger); }
-    button.small { padding:8px 10px; font-size:11px; }
-    button.icon { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 10px; min-height:60px; gap:4px; font-size:11px; }
-    button.icon:hover { background:rgba(255,255,255,0.12); }
-    button.icon.active { background:rgba(100,213,255,0.2); border-color:var(--accent); }
-
-    .stats { font-size:12px; line-height:1.7; color:var(--text); }
-    .stats span { color:var(--muted); }
-    .stat-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
-    .stat-row:last-child { border-bottom:none; }
-    .chip { display:inline-block; width:10px; height:10px; border-radius:2px; vertical-align:middle; margin-right:6px; }
-    .red { background:#ff5757; } .blue { background:#5b9fff; } .yellow { background:#ffd93d; } .green { background:#4ade80; }
-    .muted { color:var(--muted); }
-
-    .menu-toggle {
-      position:absolute;
-      left:12px;
-      top:12px;
-      z-index:30;
-      pointer-events:auto;
-      width:40px;
-      height:40px;
-      padding:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(12,16,24,0.92);
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:8px;
-      backdrop-filter:blur(12px);
-      color:var(--text);
-      font-weight:700;
-      cursor:pointer;
-      box-shadow:0 8px 32px rgba(0,0,0,0.4);
-      transition:all 0.15s ease;
+    html, body { 
+      margin: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
     }
 
-    .menu-toggle:hover {
-      transform:translateY(-2px);
-      background:rgba(255,255,255,0.08);
-      border-color:rgba(255,255,255,0.2);
+    canvas { 
+      display: block; 
+      width: 100vw; 
+      height: 100vh; 
+      cursor: crosshair; 
+      image-rendering: pixelated;
     }
 
-    .menu-toggle::before {
-      content:attr(data-state);
-      font-size:18px;
+    .hud { 
+      position: fixed; 
+      inset: 0; 
+      pointer-events: none; 
     }
 
-    .scroll { overflow-y:auto; }
-    .scroll::-webkit-scrollbar { width:6px; }
-    .scroll::-webkit-scrollbar-track { background:transparent; }
-    .scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
-    .scroll::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.25); }
+    /* Panels */
+    .panel, .legend, .footer, .menu { 
+      position: absolute; 
+      background: var(--panel); 
+      border: 1px solid rgba(0, 212, 255, 0.15); 
+      border-radius: 12px; 
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      pointer-events: auto;
+    }
 
-    .separator { height:1px; background:rgba(255,255,255,0.1); margin:8px 0; }
-    .badge { display:inline-block; background:var(--accent); color:var(--bg); padding:2px 6px; border-radius:3px; font-size:10px; font-weight:700; margin-left:4px; }
-    .badge.alert { background:var(--danger); }
-    .info-text { font-size:11px; color:var(--muted); margin:6px 0; line-height:1.5; }
+    .legend { 
+      right: 12px; 
+      top: 12px; 
+      width: 280px; 
+      padding: 16px; 
+      pointer-events: none; 
+      font-size: 12px; 
+      line-height: 1.8;
+      background: var(--panel);
+    }
+
+    .footer { 
+      left: 12px; 
+      bottom: 12px; 
+      padding: 12px 16px; 
+      pointer-events: none; 
+      max-width: 600px; 
+      font-size: 13px;
+      transition: opacity 0.3s ease;
+    }
+
+    .menu { 
+      display: none; 
+      left: 50%; 
+      top: 50%; 
+      transform: translate(-50%, -50%); 
+      width: 420px; 
+      padding: 24px; 
+      pointer-events: auto; 
+      z-index: 20;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    h1 { 
+      margin: 0 0 16px 0; 
+      font-size: 24px; 
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Grid Layout */
+    .build-panel {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      width: 380px;
+      pointer-events: auto;
+      z-index: 15;
+      transition: all 0.3s ease;
+    }
+
+    .build-panel.hidden {
+      transform: translateX(-420px);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    .panel-toggle {
+      position: fixed;
+      left: 12px;
+      top: 12px;
+      width: 48px;
+      height: 48px;
+      background: var(--panel);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      border-radius: 12px;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      z-index: 16;
+    }
+
+    .panel-toggle:hover {
+      background: rgba(0, 212, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .build-panel.hidden .panel-toggle {
+      left: 12px;
+    }
+
+    .build-panel:not(.hidden) .panel-toggle {
+      left: 404px;
+    }
+
+    /* Grid for tool buttons */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .grid.full {
+      grid-template-columns: 1fr;
+    }
+
+    .grid.wide {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Buttons */
+    button {
+      pointer-events: auto;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-height: 60px;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+
+    button.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--accent);
+      color: var(--accent-hover);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+    }
+
+    button.active:hover {
+      background: rgba(0, 212, 255, 0.25);
+    }
+
+    button.danger {
+      color: var(--danger);
+    }
+
+    button.danger.active {
+      background: rgba(255, 90, 90, 0.15);
+      border-color: var(--danger);
+      box-shadow: 0 0 12px rgba(255, 90, 90, 0.3);
+    }
+
+    button.success {
+      color: var(--success);
+    }
+
+    button.success.active {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: var(--success);
+      box-shadow: 0 0 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .button-icon {
+      font-size: 18px;
+    }
+
+    .button-label {
+      font-size: 11px;
+    }
+
+    /* Color selector chips */
+    .chip {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* Stats panel */
+    .stats {
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px solid rgba(0, 212, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stats-label {
+      color: var(--text-muted);
+    }
+
+    .stats-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Factory menu */
+    .menu-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    button.close-btn {
+      min-height: auto;
+      padding: 8px 12px;
+      background: rgba(255, 90, 90, 0.1);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    button.close-btn:hover {
+      background: rgba(255, 90, 90, 0.2);
+    }
+
+    .menu-section {
+      margin-bottom: 16px;
+    }
+
+    .menu-section h3 {
+      margin: 0 0 10px 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section-content {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .line-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .line-info-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .separator {
+      height: 1px;
+      background: rgba(0, 212, 255, 0.1);
+      margin: 12px 0;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .scroll-content {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .scroll-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scroll-content::-webkit-scrollbar-track {
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    .scroll-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .scroll-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 212, 255, 0.5);
+    }
   </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <div class="hud">
-  <button id="toggle-build-menu" class="menu-toggle" data-state="▼"></button>
+  <!-- Build Menu Panel -->
+  <div class="build-panel" id="build-panel">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h1>Build Menu</h1>
+        </div>
+      </div>
 
-  <div class="panel scroll" id="build-menu">
-    <h1>🚂 Train Tycoon</h1>
-    
-    <h2>Build Tools</h2>
-    <div class="grid">
-      <div class="grid-item">
-        <button id="tool-straight" class="icon active" title="Straight Track ($20)">
-          <span>━━</span>
-          <span style="font-size:10px;">Straight</span>
+      <!-- Tools Grid -->
+      <h2>Tools</h2>
+      <div class="grid">
+        <button id="tool-straight" class="active" title="Straight Track (1)">
+          <span class="button-icon">—</span>
+          <span class="button-label">Straight</span>
+        </button>
+        <button id="tool-curve" title="Curve Track (2)">
+          <span class="button-icon">⤵</span>
+          <span class="button-label">Curve</span>
         </button>
       </div>
-      <div class="grid-item">
-        <button id="tool-curve" class="icon" title="Curve Track ($20)">
-          <span>⌐</span>
-          <span style="font-size:10px;">Curve</span>
-        </button>
-      </div>
-      <div class="grid-item">
-        <button id="tool-station" class="icon" title="Station ($30)">
-          <span>⬛</span>
-          <span style="font-size:10px;">Station</span>
-        </button>
-      </div>
-      <div class="grid-item">
-        <button id="tool-bridge" class="icon" title="Bridge ($80)">
-          <span>═══</span>
-          <span style="font-size:10px;">Bridge</span>
-        </button>
-      </div>
-      <div class="grid-item">
-        <button id="tool-delete" class="icon danger" title="Delete">
-          <span>✕</span>
-          <span style="font-size:10px;">Delete</span>
-        </button>
-      </div>
-      <div class="grid-item">
-        <button id="tool-signal" class="icon" title="Signal ($15)">
-          <span>🚦</span>
-          <span style="font-size:10px;">Signal</span>
-        </button>
-      </div>
-    </div>
 
-    <div class="separator"></div>
-    <h2>Line Color</h2>
-    <div class="row">
-      <button id="line-red" class="active"><span class="chip red"></span>Red</button>
-      <button id="line-blue"><span class="chip blue"></span>Blue</button>
-      <button id="line-yellow"><span class="chip yellow"></span>Yellow</button>
-    </div>
+      <div class="grid">
+        <button id="tool-station" title="Station (3)">
+          <span class="button-icon">◆</span>
+          <span class="button-label">Station</span>
+        </button>
+        <button id="tool-bridge" title="Bridge (4)">
+          <span class="button-icon">╫</span>
+          <span class="button-label">Bridge</span>
+        </button>
+      </div>
 
-    <div class="separator"></div>
-    <h2>Options</h2>
-    <div class="row">
-      <button id="rotate">Rotate (R)</button>
-      <button id="center">Center View</button>
-    </div>
+      <div class="grid full">
+        <button id="tool-delete" class="danger" title="Delete (5)">
+          <span class="button-icon">✕</span>
+          <span class="button-label">Delete</span>
+        </button>
+      </div>
 
-    <div class="separator"></div>
-    <h2>Hiring</h2>
-    <button id="hire-worker" style="width:100%;">Hire Worker (+Income) <span class="badge">$10</span></button>
+      <div class="separator"></div>
 
-    <div class="separator"></div>
-    <div class="stats" id="stats">
-      <div class="stat-row"><span>Money:</span> <span id="money-display">$150</span></div>
-      <div class="stat-row"><span>Income/sec:</span> <span id="income-display">$0</span></div>
-      <div class="stat-row"><span>Workers:</span> <span id="workers-display">0</span></div>
-      <div class="stat-row"><span>Trains Active:</span> <span id="trains-display">0</span></div>
-      <div class="stat-row"><span>Stations:</span> <span id="stations-display">0</span></div>
+      <!-- Line Colors -->
+      <h2>Line Color</h2>
+      <div class="grid wide">
+        <button id="line-red" class="active" title="Red Line (Q)">
+          <span class="chip" style="background: var(--red-line);"></span>
+          <span class="button-label">Red</span>
+        </button>
+        <button id="line-blue" title="Blue Line">
+          <span class="chip" style="background: var(--blue-line);"></span>
+          <span class="button-label">Blue</span>
+        </button>
+        <button id="line-yellow" title="Yellow Line (E)">
+          <span class="chip" style="background: var(--yellow-line);"></span>
+          <span class="button-label">Yellow</span>
+        </button>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Actions -->
+      <h2>Actions</h2>
+      <div class="grid">
+        <button id="rotate" title="Rotate (R)">
+          <span class="button-icon">↻</span>
+          <span class="button-label">Rotate</span>
+        </button>
+        <button id="hire-worker" class="success" title="Hire Worker">
+          <span class="button-icon">👤</span>
+          <span class="button-label">Hire</span>
+        </button>
+      </div>
+
+      <div class="grid full">
+        <button id="center" title="Center on Factory">
+          <span class="button-icon">⊕</span>
+          <span class="button-label">Center</span>
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats" id="stats"></div>
     </div>
   </div>
 
+  <!-- Toggle Button -->
+  <button class="panel-toggle" id="toggle-build-menu" title="Toggle Menu">►</button>
+
+  <!-- Legend -->
   <div class="legend">
-    <div><b>Controls</b></div>
-    <div>WASD: Pan camera</div>
-    <div>Mouse: Aim build</div>
+    <h2>Controls</h2>
+    <div>W/A/S/D: Pan camera</div>
     <div>Left click: Place</div>
-    <div>Right click factory: Train menu</div>
-    <div>R: Rotate (90°)</div>
-    <div>1-5: Tool shortcuts</div>
-    <div>Q/E: Switch line color</div>
-    <div style="margin-top:12px;"><b>Costs</b></div>
-    <div>Track: $20 | Curve: $20</div>
-    <div>Station: $30 | Bridge: $80</div>
-    <div>Signal: $15 | Worker: $10</div>
-    <div>Train: $100</div>
+    <div>Right click: Factory menu</div>
+    <div style="margin-top: 8px; color: var(--text-muted);">
+      <div>Track: $20 | Bridge: $80</div>
+      <div>Worker: $10 | Train: $100</div>
+    </div>
   </div>
 
+  <!-- Footer Message -->
   <div class="footer" id="footer">Loading world...</div>
 
+  <!-- Factory Menu -->
   <div id="factory-menu" class="menu">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:16px;">
-      <div><b>🏭 Factory Menu</b></div>
-      <button id="close-factory-menu" class="small">Close</button>
+    <div class="menu-title">
+      <h1 style="margin: 0;">Factory</h1>
+      <button id="close-factory-menu" class="close-btn">✕</button>
     </div>
-    <div id="factory-menu-body" style="font-size:13px; line-height:1.8;"></div>
+    <div class="scroll-content" id="factory-menu-body"></div>
   </div>
 </div>
 
@@ -229,124 +542,236 @@
   const stations = new Map();
   const trains = [];
 
-  const lineColors = { red:'#ff5757', blue:'#5b9fff', yellow:'#ffd93d' };
-  const lineKeys = ['red','blue','yellow'];
-  const toolKeys = ['straight','curve','station','bridge','delete','signal'];
+  const lineColors = { red: '#ff6b6b', blue: '#4ecdc4', yellow: '#ffd93d' };
+  const lineKeys = ['red', 'blue', 'yellow'];
+  const toolKeys = ['straight', 'curve', 'station', 'bridge', 'delete'];
 
-  const player = { x:0, y:0, speed:420 };
-  const camera = { x:0, y:0 };
-  const mouse = { x:0, y:0, worldX:0, worldY:0, tileX:0, tileY:0 };
+  const player = { x: 0, y: 0, speed: 420 };
+  const camera = { x: 0, y: 0 };
+  const mouse = { x: 0, y: 0, worldX: 0, worldY: 0, tileX: 0, tileY: 0 };
 
-  let money = 150, workers = 0, selectedTool='straight', selectedLine='red', rotation=0;
+  let money = 150, workers = 0, selectedTool = 'straight', selectedLine = 'red', rotation = 0;
   let hoveredKey = null;
+  let gameTime = 0;
 
   const TRAIN_COST = 100;
-  const STATION_COST = 30;
-  const SIGNAL_COST = 15;
-  const trainStock = { red:0, blue:0, yellow:0 };
-  const builtCounts = { red:0, blue:0, yellow:0 };
+  const trainStock = { red: 0, blue: 0, yellow: 0 };
+  const builtCounts = { red: 0, blue: 0, yellow: 0 };
 
   const keys = new Set();
 
   // --- RNG / noise helpers
-  const lerp = (a,b,t)=> a + (b-a)*t;
-  const smoothstep = t => t*t*(3-2*t);
-  function hash2i(x,y,s=0) {
-    let n = x|0;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smoothstep = t => t * t * (3 - 2 * t);
+  
+  function hash2i(x, y, s = 0) {
+    let n = x | 0;
     n = Math.imul(n ^ (n >>> 16), 2246822507);
-    n ^= Math.imul((y|0) ^ (n >>> 13), 3266489917);
-    n ^= Math.imul((s|0) ^ (n >>> 16), 668265263);
+    n ^= Math.imul((y | 0) ^ (n >>> 13), 3266489917);
+    n ^= Math.imul((s | 0) ^ (n >>> 16), 668265263);
     n = Math.imul(n ^ (n >>> 15), 2246822507);
     return (n >>> 0) / 4294967296;
   }
-  function valueNoise(x,y,s=0,scale=1) {
-    const fx = x*scale, fy = y*scale;
+
+  function valueNoise(x, y, s = 0, scale = 1) {
+    const fx = x * scale, fy = y * scale;
     const x0 = Math.floor(fx), y0 = Math.floor(fy);
-    const tx = smoothstep(fx-x0), ty = smoothstep(fy-y0);
-    const a = hash2i(x0,y0,s), b = hash2i(x0+1,y0,s), c = hash2i(x0,y0+1,s), d = hash2i(x0+1,y0+1,s);
-    return lerp(lerp(a,b,tx), lerp(c,d,tx), ty);
+    const tx = smoothstep(fx - x0), ty = smoothstep(fy - y0);
+    const a = hash2i(x0, y0, s), b = hash2i(x0 + 1, y0, s), c = hash2i(x0, y0 + 1, s), d = hash2i(x0 + 1, y0 + 1, s);
+    return lerp(lerp(a, b, tx), lerp(c, d, tx), ty);
   }
 
-  // --- Terrain
-  function getTerrain(wx,wy) {
+  // --- Enhanced Terrain with more variety
+  function getTerrain(wx, wy) {
     if (wx === 0 && wy === 0) return 'factory';
     const riverCurve = Math.sin((wx + worldSeed * 0.001) * 0.055) * 15 + Math.sin((wx + 200) * 0.013) * 9;
     const riverDist = Math.abs(wy - riverCurve);
     if (riverDist < 1.7) return 'river';
-    if (riverDist < 3.2 && hash2i(wx,wy,worldSeed+8) > 0.65) return 'river';
-    const pondNoise = valueNoise(wx,wy,worldSeed+21,0.11);
-    const pondShape = valueNoise(wx,wy,worldSeed+22,0.03);
+    if (riverDist < 3.2 && hash2i(wx, wy, worldSeed + 8) > 0.65) return 'river';
+
+    const pondNoise = valueNoise(wx, wy, worldSeed + 21, 0.11);
+    const pondShape = valueNoise(wx, wy, worldSeed + 22, 0.03);
     if (pondNoise > 0.84 && pondShape > 0.56) return 'pond';
+
     const roadX = Math.abs((wx % 28) - 14), roadY = Math.abs((wy % 28) - 14);
-    const roadChance = valueNoise(wx,wy,worldSeed+44,0.07);
+    const roadChance = valueNoise(wx, wy, worldSeed + 44, 0.07);
     if ((roadX < 1.15 || roadY < 1.15) && roadChance > 0.22) return 'road';
-    const buildingNoise = valueNoise(wx,wy,worldSeed+66,0.08);
+
+    const buildingNoise = valueNoise(wx, wy, worldSeed + 66, 0.08);
     const nearRoad = roadX < 5 || roadY < 5;
     if (nearRoad && buildingNoise > 0.82) return 'building';
     if (!nearRoad && buildingNoise > 0.94) return 'building';
-    const treeNoise = valueNoise(wx,wy,worldSeed+88,0.13);
-    if (treeNoise > 0.73) return 'tree';
+
+    const treeNoise = valueNoise(wx, wy, worldSeed + 88, 0.13);
+    const rockNoise = valueNoise(wx, wy, worldSeed + 99, 0.09);
+    
+    if (treeNoise > 0.75) return 'tree';
+    if (rockNoise > 0.82) return 'rock';
+    
     return 'grass';
   }
 
-  function chunkKey(cx,cy){ return cx + ',' + cy; }
-  function keyFor(x,y){ return x + ',' + y; }
+  function chunkKey(cx, cy) { return cx + ',' + cy; }
+  function keyFor(x, y) { return x + ',' + y; }
 
-  function drawTileToChunk(ctx2, wx, wy, terrain, offX, offY) {
-    const checker = (wx+wy)&1;
-    if (terrain === 'grass') ctx2.fillStyle = checker ? '#c0df8a' : '#b5d97f';
-    else if (terrain==='road') ctx2.fillStyle = '#7a7a7a';
-    else if (terrain==='river') ctx2.fillStyle = '#4a99d8';
-    else if (terrain==='pond') ctx2.fillStyle = '#3d88c7';
-    else if (terrain==='tree') ctx2.fillStyle = '#a8ce5f';
-    else if (terrain==='building') ctx2.fillStyle = '#a89878';
-    else if (terrain==='factory') ctx2.fillStyle = '#7a8291';
-    else ctx2.fillStyle = '#cddc9f';
+  // --- Enhanced tile drawing with textures
+  function drawTileToChunk(ctx2, wx, wy, terrain, offX, offY, time) {
+    // Base colors
+    const colors = {
+      grass: (wx + wy) & 1 ? '#a8d563' : '#9ecb4f',
+      darkGrass: (wx + wy) & 1 ? '#7db338' : '#6fa02f',
+      road: '#6b6b6b',
+      river: '#3a8fd8',
+      riverLight: '#5ba8e8',
+      pond: '#2a7fc0',
+      tree: '#8b7355',
+      treeLeaf: '#3d7d2d',
+      rock: '#5a5a5a',
+      rockDark: '#3d3d3d',
+      building: '#9d9d9d',
+      buildingWindow: '#e8d4a2',
+      factory: '#6a7580',
+      factoryShadow: '#3d434a',
+      factoryStack: '#5a6270'
+    };
+
+    ctx2.fillStyle = colors.grass;
     ctx2.fillRect(offX, offY, TILE, TILE);
 
-    if (terrain === 'tree') {
-      ctx2.fillStyle = '#2b5e24'; ctx2.beginPath(); ctx2.arc(offX+16, offY+14, 8,0,Math.PI*2); ctx2.fill();
-      ctx2.fillStyle = '#6d4c1f'; ctx2.fillRect(offX+14, offY+19, 4, 9);
-    } else if (terrain === 'building') {
-      ctx2.fillStyle = '#7d7a70'; ctx2.fillRect(offX+4, offY+4, 24,24);
-      ctx2.fillStyle = '#c9c5b8'; ctx2.fillRect(offX+8,offY+8,4,4); ctx2.fillRect(offX+16,offY+8,4,4); ctx2.fillRect(offX+8,offY+16,4,4); ctx2.fillRect(offX+16,offY+16,4,4);
-      ctx2.fillStyle = '#5a5450'; ctx2.fillRect(offX+12, offY+12, 8, 8);
+    if (terrain === 'grass') {
+      // Grass pattern
+      ctx2.fillStyle = colors.darkGrass;
+      if ((wx + wy) % 3 === 0) ctx2.fillRect(offX + 4, offY + 4, 6, 6);
+      if ((wx * 7 + wy * 11) % 5 === 0) ctx2.fillRect(offX + 22, offY + 20, 5, 5);
+      // Grass texture dots
+      ctx2.fillStyle = 'rgba(0,0,0,0.1)';
+      for (let i = 0; i < 4; i++) {
+        const x = (wx * 73 + i * 17) % TILE;
+        const y = (wy * 89 + i * 23) % TILE;
+        ctx2.fillRect(offX + x, offY + y, 1, 1);
+      }
+    } else if (terrain === 'river') {
+      ctx2.fillStyle = colors.river;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      // Water animation waves
+      ctx2.fillStyle = colors.riverLight;
+      const waveOffset = Math.sin((wx + time * 0.5) * 0.3) * 2;
+      ctx2.fillRect(offX + 4 + waveOffset, offY + 6, 8, 2);
+      ctx2.fillRect(offX + 18 + waveOffset, offY + 14, 8, 2);
+      ctx2.fillRect(offX + 6 - waveOffset, offY + 24, 10, 2);
+    } else if (terrain === 'pond') {
+      ctx2.fillStyle = colors.pond;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      ctx2.fillStyle = colors.riverLight;
+      const waveOffset = Math.sin((wx + time * 0.3) * 0.4) * 1.5;
+      ctx2.beginPath();
+      ctx2.arc(offX + 16 + waveOffset, offY + 16, 8, 0, Math.PI * 2);
+      ctx2.fill();
+    } else if (terrain === 'tree') {
+      ctx2.fillStyle = colors.darkGrass;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      // Tree trunk
+      ctx2.fillStyle = colors.tree;
+      ctx2.fillRect(offX + 13, offY + 16, 6, 12);
+      // Tree foliage - multiple layers
+      ctx2.fillStyle = colors.treeLeaf;
+      ctx2.beginPath();
+      ctx2.arc(offX + 16, offY + 10, 10, 0, Math.PI * 2);
+      ctx2.fill();
+      ctx2.beginPath();
+      ctx2.arc(offX + 12, offY + 13, 7, 0, Math.PI * 2);
+      ctx2.fill();
+      ctx2.beginPath();
+      ctx2.arc(offX + 20, offY + 13, 7, 0, Math.PI * 2);
+      ctx2.fill();
+      // Highlight
+      ctx2.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx2.beginPath();
+      ctx2.arc(offX + 14, offY + 8, 3, 0, Math.PI * 2);
+      ctx2.fill();
+    } else if (terrain === 'rock') {
+      ctx2.fillStyle = colors.rock;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      // Rock shape
+      ctx2.fillStyle = colors.rockDark;
+      ctx2.beginPath();
+      ctx2.arc(offX + 16, offY + 16, 10, 0, Math.PI * 2);
+      ctx2.fill();
+      // Rock highlight
+      ctx2.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx2.beginPath();
+      ctx2.arc(offX + 12, offY + 12, 4, 0, Math.PI * 2);
+      ctx2.fill();
     } else if (terrain === 'road') {
-      ctx2.fillStyle = '#5a5a5a'; ctx2.fillRect(offX+13,offY,6,TILE); ctx2.fillRect(offX,offY+13,TILE,6);
-      ctx2.fillStyle = '#ffd966'; ctx2.fillRect(offX+14, offY+14, 4, 4);
-    } else if (terrain === 'river' || terrain === 'pond') {
-      ctx2.fillStyle = 'rgba(255,255,255,0.2)'; ctx2.fillRect(offX+2,offY+2,5,2); ctx2.fillRect(offX+18,offY+14,6,2);
+      ctx2.fillStyle = colors.darkGrass;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      ctx2.fillStyle = colors.road;
+      ctx2.fillRect(offX + 12, offY, 8, TILE);
+      ctx2.fillRect(offX, offY + 12, TILE, 8);
+      // Road markings
+      ctx2.fillStyle = '#ffeb3b';
+      ctx2.fillRect(offX + 14, offY + 4, 2, 3);
+      ctx2.fillRect(offX + 14, offY + 13, 2, 3);
+      ctx2.fillRect(offX + 14, offY + 22, 2, 3);
+      ctx2.fillRect(offX + 4, offY + 14, 3, 2);
+      ctx2.fillRect(offX + 13, offY + 14, 3, 2);
+      ctx2.fillRect(offX + 22, offY + 14, 3, 2);
+    } else if (terrain === 'building') {
+      ctx2.fillStyle = colors.darkGrass;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      ctx2.fillStyle = colors.building;
+      ctx2.fillRect(offX + 3, offY + 4, 26, 24);
+      // Windows
+      ctx2.fillStyle = colors.buildingWindow;
+      for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 2; j++) {
+          ctx2.fillRect(offX + 7 + i * 12, offY + 8 + j * 8, 4, 4);
+        }
+      }
+      // Door
+      ctx2.fillStyle = '#6b4423';
+      ctx2.fillRect(offX + 14, offY + 20, 4, 8);
     } else if (terrain === 'factory') {
-      ctx2.fillStyle = '#6a7180'; ctx2.fillRect(offX+1,offY+3,30,26);
-      ctx2.fillStyle='#4a525c'; ctx2.fillRect(offX+8,offY+10,8,8); ctx2.fillRect(offX+18,offY+10,6,8);
-      ctx2.fillStyle='#a8b1ba'; ctx2.fillRect(offX+26,offY-6,4,12); ctx2.fillRect(offX+21,offY-3,4,9);
-      ctx2.fillStyle='#ffd966'; ctx2.beginPath(); ctx2.arc(offX+16, offY+8, 3, 0, Math.PI*2); ctx2.fill();
+      ctx2.fillStyle = colors.factoryShadow;
+      ctx2.fillRect(offX, offY, TILE, TILE);
+      ctx2.fillStyle = colors.factory;
+      ctx2.fillRect(offX + 2, offY + 6, 28, 20);
+      // Factory windows
+      ctx2.fillStyle = colors.buildingWindow;
+      ctx2.fillRect(offX + 6, offY + 10, 5, 5);
+      ctx2.fillRect(offX + 15, offY + 10, 5, 5);
+      ctx2.fillRect(offX + 24, offY + 10, 3, 5);
+      // Smokestack
+      ctx2.fillStyle = colors.factoryStack;
+      ctx2.fillRect(offX + 26, offY - 2, 4, 12);
+      ctx2.fillRect(offX + 21, offY + 1, 3, 9);
     }
   }
 
-  function drawChunkCanvas(chunk) {
+  function drawChunkCanvas(chunk, time) {
     const can = document.createElement('canvas');
-    can.width = CHUNK * TILE; can.height = CHUNK * TILE;
+    can.width = CHUNK * TILE;
+    can.height = CHUNK * TILE;
     const c = can.getContext('2d');
     c.imageSmoothingEnabled = false;
-    for (let ly=0; ly<CHUNK; ly++) {
-      for (let lx=0; lx<CHUNK; lx++) {
+    for (let ly = 0; ly < CHUNK; ly++) {
+      for (let lx = 0; lx < CHUNK; lx++) {
         const wx = chunk.cx * CHUNK + lx;
         const wy = chunk.cy * CHUNK + ly;
-        const terrain = chunk.tiles[ly*CHUNK + lx];
-        drawTileToChunk(c, wx, wy, terrain, lx*TILE, ly*TILE);
+        const terrain = chunk.tiles[ly * CHUNK + lx];
+        drawTileToChunk(c, wx, wy, terrain, lx * TILE, ly * TILE, time);
       }
     }
     chunk.canvas = can;
   }
 
-  function generateChunk(cx,cy) {
-    const k = chunkKey(cx,cy);
+  function generateChunk(cx, cy) {
+    const k = chunkKey(cx, cy);
     if (chunkMemory.has(k)) return chunkMemory.get(k);
-    const tiles = new Array(CHUNK*CHUNK);
-    for (let y=0; y<CHUNK; y++) for (let x=0; x<CHUNK; x++) tiles[y*CHUNK+x] = getTerrain(cx*CHUNK+x, cy*CHUNK+y);
-    const chunk = { cx, cy, tiles, canvas:null };
-    drawChunkCanvas(chunk);
+    const tiles = new Array(CHUNK * CHUNK);
+    for (let y = 0; y < CHUNK; y++) for (let x = 0; x < CHUNK; x++) tiles[y * CHUNK + x] = getTerrain(cx * CHUNK + x, cy * CHUNK + y);
+    const chunk = { cx, cy, tiles, canvas: null, lastTime: -1 };
+    drawChunkCanvas(chunk, gameTime);
     chunkMemory.set(k, chunk);
     const CAP = 420;
     if (chunkMemory.size > CAP) {
@@ -356,54 +781,53 @@
     return chunk;
   }
 
-  function getTerrainAt(wx,wy) {
+  function getTerrainAt(wx, wy) {
     const cx = Math.floor(wx / CHUNK), cy = Math.floor(wy / CHUNK);
-    const chunk = generateChunk(cx,cy);
+    const chunk = generateChunk(cx, cy);
     const lx = ((wx % CHUNK) + CHUNK) % CHUNK, ly = ((wy % CHUNK) + CHUNK) % CHUNK;
-    return chunk.tiles[ly*CHUNK + lx];
+    return chunk.tiles[ly * CHUNK + lx];
   }
 
   // --- Pieces & connections
-  function canBuildOnTerrain(t, tool) {
-    if (tool === 'bridge') return t === 'river' || t === 'pond';
-    if (tool === 'signal') return t !== 'river' && t !== 'pond' && t !== 'factory';
-    return t !== 'river' && t !== 'pond';
+  function canBuildOnTerrain(t, tool) { 
+    if (tool === 'bridge') return t === 'river' || t === 'pond'; 
+    return t !== 'river' && t !== 'pond'; 
   }
 
   function getConnections(piece) {
     if (!piece) return [];
     if (piece.type === 'straight' || piece.type === 'bridge') {
-      return (piece.rot & 1) === 0 ? [[1,0],[-1,0]] : [[0,1],[0,-1]];
+      return (piece.rot & 1) === 0 ? [[1, 0], [-1, 0]] : [[0, 1], [0, -1]];
     }
     if (piece.type === 'curve') {
       switch (piece.rot & 3) {
-        case 0: return [[0,-1],[1,0]];
-        case 1: return [[1,0],[0,1]];
-        case 2: return [[0,1],[-1,0]];
-        case 3: return [[-1,0],[0,-1]];
+        case 0: return [[0, -1], [1, 0]];
+        case 1: return [[1, 0], [0, 1]];
+        case 2: return [[0, 1], [-1, 0]];
+        case 3: return [[-1, 0], [0, -1]];
       }
     }
-    if (piece.type === 'station') return [[1,0],[-1,0],[0,1],[0,-1]];
+    if (piece.type === 'station') {
+      return [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    }
     return [];
   }
 
   function hasTrackWithinOneForLine(line) {
-    const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+    const neighbors = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
     for (const n of neighbors) {
       const piece = builtObjects.get(keyFor(n.dx, n.dy));
-      if (piece && piece.line === line && (piece.type === 'straight' || piece.type === 'curve' || piece.type === 'bridge' || piece.type === 'station')) return true;
+      if (piece && piece.line === line) return true;
     }
     return false;
   }
 
   function getTrackExitForLine(line) {
-    const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+    const neighbors = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
     for (const n of neighbors) {
       const piece = builtObjects.get(keyFor(n.dx, n.dy));
       if (!piece || piece.line !== line) continue;
-      if (piece.type === 'straight' || piece.type === 'curve' || piece.type === 'bridge' || piece.type === 'station') {
-        return { tx: n.dx, ty: n.dy, dx: n.dx, dy: n.dy };
-      }
+      return { tx: n.dx, ty: n.dy, dx: n.dx, dy: n.dy };
     }
     return null;
   }
@@ -413,102 +837,125 @@
   const footerEl = document.getElementById('footer');
   const factoryMenu = document.getElementById('factory-menu');
   const factoryMenuBody = document.getElementById('factory-menu-body');
-  const buildMenuEl = document.getElementById('build-menu');
-  const toggleBuildMenu = document.getElementById('toggle-build-menu');
+  const buildPanel = document.getElementById('build-panel');
+  const toggleBtn = document.getElementById('toggle-build-menu');
 
   function flash(text) {
-    footerEl.textContent = text; footerEl.style.opacity = '1';
-    clearTimeout(flash._t); flash._t = setTimeout(()=>{ footerEl.style.opacity = '0.7'; }, 1400);
+    footerEl.textContent = text;
+    footerEl.style.opacity = '1';
+    clearTimeout(flash._t);
+    flash._t = setTimeout(() => { footerEl.style.opacity = '0.6'; }, 1500);
   }
 
   function refreshButtons() {
     for (const k of toolKeys) {
-      const btn=document.getElementById('tool-'+k);
-      if (btn) btn.classList.toggle('active', selectedTool===k);
+      const btn = document.getElementById('tool-' + k);
+      if (btn) btn.classList.toggle('active', selectedTool === k);
     }
     for (const k of lineKeys) {
-      const btn=document.getElementById('line-'+k);
-      if (btn) btn.classList.toggle('active', selectedLine===k);
+      const btn = document.getElementById('line-' + k);
+      if (btn) btn.classList.toggle('active', selectedLine === k);
     }
   }
 
-  function updateStatsDisplay() {
-    const activeCounts = { red:0, blue:0, yellow:0 };
-    for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line]||0) + 1;
-    document.getElementById('money-display').textContent = '$' + money.toFixed(0);
-    document.getElementById('income-display').textContent = '$' + (workers*5).toFixed(0);
-    document.getElementById('workers-display').textContent = workers;
-    document.getElementById('trains-display').textContent = activeCounts.red + activeCounts.blue + activeCounts.yellow;
-    document.getElementById('stations-display').textContent = stations.size;
+  // --- Build / delete / factory menu
+  function renderFactoryMenu() {
+    factoryMenuBody.innerHTML = `
+      <div class="menu-section">
+        <h3>Information</h3>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: var(--text-muted);">
+          Buy trains and deploy them onto track tiles next to the factory. Trains earn money by passing stations.
+        </p>
+      </div>
+
+      <div class="menu-section">
+        <h3>Owned Trains</h3>
+        <div class="section-content">
+          <div class="line-info">
+            <span class="line-info-label"><span class="chip" style="background: var(--red-line);"></span>Red</span>
+            <span>${trainStock.red}</span>
+          </div>
+          <div class="line-info">
+            <span class="line-info-label"><span class="chip" style="background: var(--blue-line);"></span>Blue</span>
+            <span>${trainStock.blue}</span>
+          </div>
+          <div class="line-info">
+            <span class="line-info-label"><span class="chip" style="background: var(--yellow-line);"></span>Yellow</span>
+            <span>${trainStock.yellow}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="menu-section">
+        <h3>Purchase</h3>
+        <div class="grid wide" style="pointer-events: auto;">
+          <button class="small" data-buy="red" style="min-height: 50px;">Buy Red<br><span style="font-size: 10px; opacity: 0.7;">$${TRAIN_COST}</span></button>
+          <button class="small" data-buy="blue" style="min-height: 50px;">Buy Blue<br><span style="font-size: 10px; opacity: 0.7;">$${TRAIN_COST}</span></button>
+          <button class="small" data-buy="yellow" style="min-height: 50px;">Buy Yellow<br><span style="font-size: 10px; opacity: 0.7;">$${TRAIN_COST}</span></button>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="menu-section">
+        <h3>Deploy</h3>
+        <div class="grid wide" style="pointer-events: auto;">
+          <button class="small" data-deploy="red" style="min-height: 50px;">Deploy<br><span style="font-size: 10px; opacity: 0.7;">Red</span></button>
+          <button class="small" data-deploy="blue" style="min-height: 50px;">Deploy<br><span style="font-size: 10px; opacity: 0.7;">Blue</span></button>
+          <button class="small" data-deploy="yellow" style="min-height: 50px;">Deploy<br><span style="font-size: 10px; opacity: 0.7;">Yellow</span></button>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; padding: 10px; background: rgba(0, 212, 255, 0.05); border-radius: 6px; font-size: 12px; color: var(--text-muted);">
+        A track tile must be adjacent to the factory to deploy trains.
+      </div>
+    `;
+    factoryMenuBody.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buyTrain(b.dataset.buy));
+    factoryMenuBody.querySelectorAll('[data-deploy]').forEach(b => b.onclick = () => deployTrain(b.dataset.deploy));
   }
 
-  // --- Factory Menu
-  function renderFactoryMenu() {
-    const trainsCost = TRAIN_COST;
-    factoryMenuBody.innerHTML = `
-      <div style="margin-bottom:12px; color:#a8b8c8; font-size:12px;">Buy trains, then deploy them on adjacent track.</div>
-      <div style="margin-bottom:8px;"><b>📦 Owned Trains</b></div>
-      <div style="margin-bottom:8px; font-size:12px;">
-        <div>🔴 Red: <b>${trainStock.red}</b></div>
-        <div>🔵 Blue: <b>${trainStock.blue}</b></div>
-        <div>🟡 Yellow: <b>${trainStock.yellow}</b></div>
-      </div>
-      <div style="margin:12px 0 8px;"><b>💳 Buy Trains</b></div>
-      <div class="row" style="pointer-events:auto; margin-bottom:12px;">
-        <button class="small" data-buy="red">Red ($${trainsCost})</button>
-        <button class="small" data-buy="blue">Blue ($${trainsCost})</button>
-        <button class="small" data-buy="yellow">Yellow ($${trainsCost})</button>
-      </div>
-      <div style="margin:12px 0 8px;"><b>🚀 Deploy Trains</b></div>
-      <div class="row" style="pointer-events:auto;">
-        <button class="small" data-deploy="red">Red</button>
-        <button class="small" data-deploy="blue">Blue</button>
-        <button class="small" data-deploy="yellow">Yellow</button>
-      </div>
-      <div style="margin-top:10px; color:#8a94a6; font-size:11px; line-height:1.6;">Track must be adjacent to factory.</div>
-    `;
-    factoryMenuBody.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buyTrain(b.dataset.buy));
-    factoryMenuBody.querySelectorAll('[data-deploy]').forEach(b=>b.onclick=()=>deployTrain(b.dataset.deploy));
+  function showFactoryMenu() { 
+    factoryMenu.style.display = 'block'; 
+    renderFactoryMenu(); 
   }
-  function showFactoryMenu(){ factoryMenu.style.display='block'; renderFactoryMenu(); }
-  function hideFactoryMenu(){ factoryMenu.style.display='none'; }
+
+  function hideFactoryMenu() { 
+    factoryMenu.style.display = 'none'; 
+  }
 
   function buyTrain(line) {
     if (money < TRAIN_COST) return flash('Not enough money');
-    money -= TRAIN_COST; trainStock[line] += 1; renderFactoryMenu(); updateStatsDisplay(); flash(`Bought a ${line} train`);
+    money -= TRAIN_COST;
+    trainStock[line] += 1;
+    renderFactoryMenu();
+    flash(`Bought a ${line} train`);
   }
 
-  function placeObject(wx,wy) {
-    const k = keyFor(wx,wy);
-    const terrain = getTerrainAt(wx,wy);
+  function placeObject(wx, wy) {
+    const k = keyFor(wx, wy);
+    const terrain = getTerrainAt(wx, wy);
     if (selectedTool === 'delete') {
       const obj = builtObjects.get(k);
       if (obj) {
         if (obj.type === 'station') stations.delete(k);
-        money += obj.cost || 20;
+        money += obj.cost || (obj.type === 'bridge' ? 80 : 20);
         builtObjects.delete(k);
-        if (builtCounts[obj.line] !== undefined) builtCounts[obj.line] = Math.max(0, builtCounts[obj.line]-1);
-        updateStatsDisplay();
+        if (builtCounts[obj.line] !== undefined) builtCounts[obj.line] = Math.max(0, builtCounts[obj.line] - 1);
         flash('Tile deleted and refunded');
       } else flash('Nothing to delete');
       return;
     }
-
-    let cost = 20;
-    if (selectedTool === 'bridge') cost = 80;
-    else if (selectedTool === 'station') cost = STATION_COST;
-    else if (selectedTool === 'signal') cost = SIGNAL_COST;
-
+    const cost = selectedTool === 'bridge' ? 80 : 20;
     if (money < cost) return flash('Not enough money');
     if (!canBuildOnTerrain(terrain, selectedTool)) return flash('Can\'t build here');
     if (builtObjects.has(k)) return flash('Tile already used');
-
-    const piece = { type:selectedTool, rot:rotation&3, line:selectedLine, cost };
+    const piece = { type: selectedTool, rot: rotation & 3, line: selectedLine, cost };
     builtObjects.set(k, piece);
-    if (piece.type === 'station') stations.set(k, { waiting:0, line:selectedLine });
+    if (piece.type === 'station') stations.set(k, { waiting: 0, line: selectedLine });
     money -= cost;
     if (builtCounts[selectedLine] !== undefined) builtCounts[selectedLine] += 1;
-    updateStatsDisplay();
     flash(`${piece.type} built for $${cost}`);
   }
 
@@ -517,75 +964,92 @@
     if (!hasTrackWithinOneForLine(line)) return flash('Put a track next to the factory first');
     const start = getTrackExitForLine(line);
     if (!start) return flash('No track found next to the factory');
+    const trainDirX = start.dx;
+    const trainDirY = start.dy;
     trainStock[line] -= 1;
     const t = {
-      deployed:true, line,
-      x:0, y:0, prevX:0, prevY:0,
-      fromX:0, fromY:0, toX:start.tx, toY:start.ty,
-      dirX:start.dx, dirY:start.dy,
-      speed:72, targetSpeed:72,
-      angle:Math.atan2(start.dy,start.dx),
-      capacity:10, load:0, paused:0,
-      crashed:false, crashT:0, vx:0, vy:0, color:lineColors[line],
+      deployed: true, line,
+      x: 0, y: 0, prevX: 0, prevY: 0,
+      fromX: 0, fromY: 0, toX: start.tx, toY: start.ty,
+      dirX: trainDirX, dirY: trainDirY,
+      speed: 72, targetSpeed: 72,
+      angle: Math.atan2(start.dy, start.dx),
+      capacity: 10, load: 0, paused: 0,
+      crashed: false, crashT: 0, vx: 0, vy: 0, color: lineColors[line],
       nearbyStations: new Set()
     };
     trains.push(t);
-    renderFactoryMenu(); updateStatsDisplay(); flash(`Deployed a ${line} train`);
+    renderFactoryMenu();
+    flash(`Deployed a ${line} train`);
   }
 
   // --- Train pathing
   function chooseNextDir(train, wx, wy) {
-    const piece = builtObjects.get(keyFor(wx,wy));
+    const piece = builtObjects.get(keyFor(wx, wy));
     if (!piece || piece.line !== train.line) return null;
     const dirs = getConnections(piece);
     if (!dirs.length) return null;
     const back = [-train.dirX, -train.dirY];
-    const usable = dirs.filter(([dx,dy]) => !(dx === back[0] && dy === back[1]));
+    const usable = dirs.filter(([dx, dy]) => !(dx === back[0] && dy === back[1]));
     if (usable.length) {
-      const straight = usable.find(([dx,dy]) => dx === train.dirX && dy === train.dirY);
+      const straight = usable.find(([dx, dy]) => dx === train.dirX && dy === train.dirY);
       if (straight) return straight;
-      return usable[(hash2i(wx,wy,worldSeed + (train.line.length*17)) * usable.length) | 0];
+      return usable[(hash2i(wx, wy, worldSeed + (train.line.length * 17)) * usable.length) | 0];
     }
     return dirs[0] || null;
   }
 
   function boardPassengers(train, wx, wy, dt) {
-    const st = stations.get(keyFor(wx,wy));
+    const st = stations.get(keyFor(wx, wy));
     if (!st) return;
-    st.waiting += (1.2 + workers*0.25) * dt;
+    st.waiting += (1.2 + workers * 0.25) * dt;
     const canBoard = Math.max(0, train.capacity - train.load);
     const boarded = Math.min(canBoard, Math.floor(st.waiting));
     if (boarded > 0) {
-      st.waiting -= boarded; train.load += boarded;
-      const fare = boarded * (2 + workers*0.1);
-      money += fare; train.paused = 0.15;
-      updateStatsDisplay();
-      flash(`${boarded} passengers boarded (+$${fare.toFixed(0)})`);
+      st.waiting -= boarded;
+      train.load += boarded;
+      const fare = boarded * (2 + workers * 0.1);
+      money += fare;
+      train.paused = 0.15;
+      flash(`+$${fare.toFixed(0)} (${boarded} passengers)`);
     }
   }
 
   function unloadMaybe(train, wx, wy) {
-    if (stations.has(keyFor(wx,wy)) && train.load>0) train.load = 0;
+    if (stations.has(keyFor(wx, wy)) && train.load > 0) train.load = 0;
   }
 
   function resolveTrainMotion(train, dt) {
     if (!train.deployed) return;
     if (train.crashed) {
-      train.crashT -= dt; train.x += train.vx * dt; train.y += train.vy * dt;
-      train.vx *= 0.985; train.vy *= 0.985;
-      if (train.crashT <= 0) { train.crashed = false; train.vx = 0; train.vy = 0; train.paused = 0.5; }
+      train.crashT -= dt;
+      train.x += train.vx * dt;
+      train.y += train.vy * dt;
+      train.vx *= 0.985;
+      train.vy *= 0.985;
+      if (train.crashT <= 0) {
+        train.crashed = false;
+        train.vx = 0;
+        train.vy = 0;
+        train.paused = 0.5;
+      }
       return;
     }
-    if (train.paused > 0) { train.paused -= dt; return; }
+    if (train.paused > 0) {
+      train.paused -= dt;
+      return;
+    }
     const targetX = train.toX * TILE, targetY = train.toY * TILE;
     const dx = targetX - train.x, dy = targetY - train.y;
-    const dist = Math.hypot(dx,dy);
+    const dist = Math.hypot(dx, dy);
     const speed = train.targetSpeed;
     if (dist <= speed * dt || dist < 2) {
-      train.x = targetX; train.y = targetY;
-      train.fromX = train.toX; train.fromY = train.toY;
+      train.x = targetX;
+      train.y = targetY;
+      train.fromX = train.toX;
+      train.fromY = train.toY;
 
-      const neighbors = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+      const neighbors = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
       const newlyAdjacent = [];
       for (const n of neighbors) {
         const k = keyFor(train.toX + n.dx, train.toY + n.dy);
@@ -598,8 +1062,7 @@
         money += amount;
         train.nearbyStations = train.nearbyStations || new Set();
         for (const k of newlyAdjacent) train.nearbyStations.add(k);
-        updateStatsDisplay();
-        flash(`Passed station: +$${amount}`);
+        flash(`+$${amount} (passed station)`);
       }
       const currentAdj = new Set();
       for (const n of neighbors) {
@@ -609,7 +1072,12 @@
       train.nearbyStations = currentAdj;
 
       const piece = builtObjects.get(keyFor(train.toX, train.toY));
-      if (!piece || piece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped.`); return; }
+      if (!piece || piece.line !== train.line) {
+        train.deployed = false;
+        train.nearbyStations = new Set();
+        flash(`${train.line} train stopped: track ended.`);
+        return;
+      }
       boardPassengers(train, train.toX, train.toY, dt);
       unloadMaybe(train, train.toX, train.toY);
 
@@ -617,54 +1085,71 @@
       if (!next) {
         const reverse = [-train.dirX, -train.dirY];
         const reversePiece = builtObjects.get(keyFor(train.toX + reverse[0], train.toY + reverse[1]));
-        if (!reversePiece || reversePiece.line !== train.line) { train.deployed = false; train.nearbyStations = new Set(); flash(`${train.line} train stopped.`); return; }
-        train.dirX = reverse[0]; train.dirY = reverse[1];
+        if (!reversePiece || reversePiece.line !== train.line) {
+          train.deployed = false;
+          train.nearbyStations = new Set();
+          flash(`${train.line} train stopped: no track to continue.`);
+          return;
+        }
+        train.dirX = reverse[0];
+        train.dirY = reverse[1];
       } else {
-        train.dirX = next[0]; train.dirY = next[1];
+        train.dirX = next[0];
+        train.dirY = next[1];
       }
-      train.toX = train.fromX + train.dirX; train.toY = train.fromY + train.dirY;
+      train.toX = train.fromX + train.dirX;
+      train.toY = train.fromY + train.dirY;
       train.angle = Math.atan2(train.dirY, train.dirX);
       return;
     }
     const nx = dx / dist, ny = dy / dist;
-    train.x += nx * speed * dt; train.y += ny * speed * dt;
+    train.x += nx * speed * dt;
+    train.y += ny * speed * dt;
     train.angle = Math.atan2(ny, nx);
   }
 
-  function crashTrains(a,b) {
+  function crashTrains(a, b) {
     if (a.crashed && b.crashed) return;
-    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx,dy) || 0.001;
+    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.001;
     const nx = dx / dist, ny = dy / dist, impulse = 180;
-    a.vx = -nx * impulse; a.vy = -ny * impulse; b.vx = nx * impulse; b.vy = ny * impulse;
-    a.crashed = b.crashed = true; a.crashT = b.crashT = 2.2; a.load = 0; b.load = 0;
+    a.vx = -nx * impulse;
+    a.vy = -ny * impulse;
+    b.vx = nx * impulse;
+    b.vy = ny * impulse;
+    a.crashed = b.crashed = true;
+    a.crashT = b.crashT = 2.2;
+    a.load = 0;
+    b.load = 0;
     money = Math.max(0, money - 15);
-    updateStatsDisplay();
-    flash('💥 Train crash!');
+    flash('Train crash! -$15');
   }
 
   function updateCollisions() {
     const BUCKET = 64;
     const buckets = new Map();
-    const bk = (x,y) => (x|0) + '|' + (y|0);
+    const bk = (x, y) => (x | 0) + '|' + (y | 0);
     for (const t of trains) {
       if (!t.deployed || t.crashed) continue;
       const bx = Math.floor(t.x / BUCKET), by = Math.floor(t.y / BUCKET);
-      const key = bk(bx,by);
-      let a = buckets.get(key); if (!a) { a = []; buckets.set(key,a); }
+      const key = bk(bx, by);
+      let a = buckets.get(key);
+      if (!a) { a = []; buckets.set(key, a); }
       a.push(t);
     }
-    for (const [k,arr] of buckets) {
-      const [bx,by] = k.split('|').map(Number);
+    for (const [k, arr] of buckets) {
+      const [bx, by] = k.split('|').map(Number);
       for (const t of arr) {
-        for (let ox=-1; ox<=1; ox++) for (let oy=-1; oy<=1; oy++) {
-          const other = buckets.get(bk(bx+ox,by+oy));
-          if (!other) continue;
-          for (const o of other) {
-            if (o === t) continue;
-            if (!o.deployed || !t.deployed) continue;
-            if (o.line === t.line) continue;
-            const dx = o.x - t.x, dy = o.y - t.y;
-            if (dx*dx + dy*dy < 20*20) crashTrains(t,o);
+        for (let ox = -1; ox <= 1; ox++) {
+          for (let oy = -1; oy <= 1; oy++) {
+            const other = buckets.get(bk(bx + ox, by + oy));
+            if (!other) continue;
+            for (const o of other) {
+              if (o === t) continue;
+              if (!o.deployed || !t.deployed) continue;
+              if (o.line === t.line) continue;
+              const dx = o.x - t.x, dy = o.y - t.y;
+              if (dx * dx + dy * dy < 20 * 20) crashTrains(t, o);
+            }
           }
         }
       }
@@ -672,7 +1157,7 @@
   }
 
   function updateStations(dt) {
-    for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers*0.12) * dt);
+    for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers * 0.12) * dt);
   }
 
   function updateEconomy(dt) {
@@ -680,74 +1165,176 @@
   }
 
   function updatePlayer(dt) {
-    const up = keys.has('KeyW') || keys.has('ArrowUp'), down = keys.has('KeyS') || keys.has('ArrowDown');
-    const left = keys.has('KeyA') || keys.has('ArrowLeft'), right = keys.has('KeyD') || keys.has('ArrowRight');
-    let dx=0, dy=0;
-    if (up) dy-=1; if (down) dy+=1; if (left) dx-=1; if (right) dx+=1;
-    const len = Math.hypot(dx,dy) || 1;
-    player.x += (dx/len) * player.speed * dt; player.y += (dy/len) * player.speed * dt;
+    const up = keys.has('KeyW') || keys.has('ArrowUp');
+    const down = keys.has('KeyS') || keys.has('ArrowDown');
+    const left = keys.has('KeyA') || keys.has('ArrowLeft');
+    const right = keys.has('KeyD') || keys.has('ArrowRight');
+    let dx = 0, dy = 0;
+    if (up) dy -= 1;
+    if (down) dy += 1;
+    if (left) dx -= 1;
+    if (right) dx += 1;
+    const len = Math.hypot(dx, dy) || 1;
+    player.x += (dx / len) * player.speed * dt;
+    player.y += (dy / len) * player.speed * dt;
   }
 
-  function updateCamera() { camera.x = player.x; camera.y = player.y; }
+  function updateCamera() {
+    camera.x = player.x;
+    camera.y = player.y;
+  }
 
-  function worldToScreenX(wx) { return wx - camera.x + window.innerWidth/2; }
-  function worldToScreenY(wy) { return wy - camera.y + window.innerHeight/2; }
+  function worldToScreenX(wx) {
+    return wx - camera.x + window.innerWidth / 2;
+  }
+
+  function worldToScreenY(wy) {
+    return wy - camera.y + window.innerHeight / 2;
+  }
 
   function loadVisibleChunks() {
     const viewW = window.innerWidth, viewH = window.innerHeight;
-    const minX = Math.floor((camera.x - viewW/2) / TILE) - 2, maxX = Math.floor((camera.x + viewW/2) / TILE) + 2;
-    const minY = Math.floor((camera.y - viewH/2) / TILE) - 2, maxY = Math.floor((camera.y + viewH/2) / TILE) + 2;
-    const cminX = Math.floor(minX/CHUNK), cmaxX = Math.floor(maxX/CHUNK);
-    const cminY = Math.floor(minY/CHUNK), cmaxY = Math.floor(maxY/CHUNK);
-    for (let cy=cminY; cy<=cmaxY; cy++) for (let cx=cminX; cx<=cmaxX; cx++) generateChunk(cx,cy);
+    const minX = Math.floor((camera.x - viewW / 2) / TILE) - 2, maxX = Math.floor((camera.x + viewW / 2) / TILE) + 2;
+    const minY = Math.floor((camera.y - viewH / 2) / TILE) - 2, maxY = Math.floor((camera.y + viewH / 2) / TILE) + 2;
+    const cminX = Math.floor(minX / CHUNK), cmaxX = Math.floor(maxX / CHUNK);
+    const cminY = Math.floor(minY / CHUNK), cmaxY = Math.floor(maxY / CHUNK);
+    for (let cy = cminY; cy <= cmaxY; cy++) {
+      for (let cx = cminX; cx <= cmaxX; cx++) {
+        generateChunk(cx, cy);
+      }
+    }
   }
 
-  function drawBuiltObjects(minX,minY,maxX,maxY) {
-    for (let wy=minY; wy<=maxY; wy++) for (let wx=minX; wx<=maxX; wx++) {
-      const obj = builtObjects.get(keyFor(wx,wy)); if (!obj) continue;
-      const sx = worldToScreenX(wx * TILE), sy = worldToScreenY(wy * TILE);
-      const color = lineColors[obj.line]; const cx = sx + TILE/2, cy = sy + TILE/2;
-      ctx.save(); ctx.translate(cx,cy); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap='round'; ctx.lineJoin='round';
-
-      if (obj.type === 'station') {
-        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.9; ctx.fillRect(-11,-11,22,22); ctx.globalAlpha = 1;
-        ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.strokeRect(-12,-12,24,24); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill();
-      } else if (obj.type === 'signal') {
-        ctx.fillStyle = '#333'; ctx.fillRect(-6,-10,12,20);
-        ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(0,-4,3,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#ffdd44'; ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle = '#44ff44'; ctx.beginPath(); ctx.arc(0,4,3,0,Math.PI*2); ctx.fill();
-      } else if (obj.type === 'bridge') {
-        ctx.strokeStyle = '#6d4f2f'; ctx.lineWidth = 6;
-        if ((obj.rot & 1) === 0) { ctx.beginPath(); ctx.moveTo(-14,0); ctx.lineTo(14,0); ctx.stroke(); }
-        else { ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(0,14); ctx.stroke(); }
-        ctx.strokeStyle = color; ctx.lineWidth = 3;
-        if ((obj.rot & 1) === 0) { ctx.beginPath(); ctx.moveTo(-14,-5); ctx.lineTo(14,-5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-14,5); ctx.lineTo(14,5); ctx.stroke(); }
-        else { ctx.beginPath(); ctx.moveTo(-5,-14); ctx.lineTo(-5,14); ctx.stroke(); ctx.beginPath(); ctx.moveTo(5,-14); ctx.lineTo(5,14); ctx.stroke(); }
-      } else if (obj.type === 'straight') {
-        const h = (obj.rot & 1) === 0; ctx.lineWidth = 6; ctx.beginPath(); h ? ctx.moveTo(-14,0) : ctx.moveTo(0,-14); h ? ctx.lineTo(14,0) : ctx.lineTo(0,14); ctx.stroke();
-        ctx.lineWidth = 3; ctx.beginPath();
-        if (h) { ctx.moveTo(-14,-5); ctx.lineTo(14,-5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-14,5); ctx.lineTo(14,5); }
-        else { ctx.moveTo(-5,-14); ctx.lineTo(-5,14); ctx.stroke(); ctx.beginPath(); ctx.moveTo(5,-14); ctx.lineTo(5,14); }
-        ctx.stroke();
-      } else if (obj.type === 'curve') {
-        ctx.lineWidth = 6; ctx.beginPath();
-        switch (obj.rot & 3) {
-          case 0: ctx.moveTo(0,-14); ctx.quadraticCurveTo(0,0,14,0); break;
-          case 1: ctx.moveTo(14,0); ctx.quadraticCurveTo(0,0,0,14); break;
-          case 2: ctx.moveTo(0,14); ctx.quadraticCurveTo(0,0,-14,0); break;
-          case 3: ctx.moveTo(-14,0); ctx.quadraticCurveTo(0,0,0,-14); break;
+  function drawBuiltObjects(minX, minY, maxX, maxY) {
+    for (let wy = minY; wy <= maxY; wy++) {
+      for (let wx = minX; wx <= maxX; wx++) {
+        const obj = builtObjects.get(keyFor(wx, wy));
+        if (!obj) continue;
+        const sx = worldToScreenX(wx * TILE), sy = worldToScreenY(wy * TILE);
+        const color = lineColors[obj.line];
+        const cx = sx + TILE / 2, cy = sy + TILE / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (obj.type === 'station') {
+          ctx.fillStyle = '#fff';
+          ctx.globalAlpha = 0.85;
+          ctx.fillRect(-11, -11, 22, 22);
+          ctx.globalAlpha = 1;
+          ctx.strokeRect(-12, -12, 24, 24);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(0, 0, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (obj.type === 'bridge') {
+          ctx.strokeStyle = '#6d4f2f';
+          ctx.lineWidth = 6;
+          if ((obj.rot & 1) === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-14, 0);
+            ctx.lineTo(14, 0);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(0, -14);
+            ctx.lineTo(0, 14);
+            ctx.stroke();
+          }
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 3;
+          if ((obj.rot & 1) === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-14, -5);
+            ctx.lineTo(14, -5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-14, 5);
+            ctx.lineTo(14, 5);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(-5, -14);
+            ctx.lineTo(-5, 14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(5, -14);
+            ctx.lineTo(5, 14);
+            ctx.stroke();
+          }
+        } else if (obj.type === 'straight') {
+          const h = (obj.rot & 1) === 0;
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          h ? ctx.moveTo(-14, 0) : ctx.moveTo(0, -14);
+          h ? ctx.lineTo(14, 0) : ctx.lineTo(0, 14);
+          ctx.stroke();
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          if (h) {
+            ctx.moveTo(-14, -5);
+            ctx.lineTo(14, -5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-14, 5);
+            ctx.lineTo(14, 5);
+          } else {
+            ctx.moveTo(-5, -14);
+            ctx.lineTo(-5, 14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(5, -14);
+            ctx.lineTo(5, 14);
+          }
+          ctx.stroke();
+        } else if (obj.type === 'curve') {
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          switch (obj.rot & 3) {
+            case 0:
+              ctx.moveTo(0, -14);
+              ctx.quadraticCurveTo(0, 0, 14, 0);
+              break;
+            case 1:
+              ctx.moveTo(14, 0);
+              ctx.quadraticCurveTo(0, 0, 0, 14);
+              break;
+            case 2:
+              ctx.moveTo(0, 14);
+              ctx.quadraticCurveTo(0, 0, -14, 0);
+              break;
+            case 3:
+              ctx.moveTo(-14, 0);
+              ctx.quadraticCurveTo(0, 0, 0, -14);
+              break;
+          }
+          ctx.stroke();
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          switch (obj.rot & 3) {
+            case 0:
+              ctx.moveTo(0, -10);
+              ctx.quadraticCurveTo(0, 0, 10, 0);
+              break;
+            case 1:
+              ctx.moveTo(10, 0);
+              ctx.quadraticCurveTo(0, 0, 0, 10);
+              break;
+            case 2:
+              ctx.moveTo(0, 10);
+              ctx.quadraticCurveTo(0, 0, -10, 0);
+              break;
+            case 3:
+              ctx.moveTo(-10, 0);
+              ctx.quadraticCurveTo(0, 0, 0, -10);
+              break;
+          }
+          ctx.stroke();
         }
-        ctx.stroke(); ctx.lineWidth = 3; ctx.beginPath();
-        switch (obj.rot & 3) {
-          case 0: ctx.moveTo(0,-10); ctx.quadraticCurveTo(0,0,10,0); break;
-          case 1: ctx.moveTo(10,0); ctx.quadraticCurveTo(0,0,0,10); break;
-          case 2: ctx.moveTo(0,10); ctx.quadraticCurveTo(0,0,-10,0); break;
-          case 3: ctx.moveTo(-10,0); ctx.quadraticCurveTo(0,0,0,-10); break;
-        }
-        ctx.stroke();
+        ctx.restore();
       }
-      ctx.restore();
     }
   }
 
@@ -755,124 +1342,204 @@
     for (const t of trains) {
       const rx = lerp(t.prevX, t.x, alpha), ry = lerp(t.prevY, t.y, alpha);
       const pX = worldToScreenX(rx), pY = worldToScreenY(ry);
-      ctx.save(); ctx.translate(pX, pY); ctx.rotate(t.angle);
-
-      if (t.crashed) ctx.fillStyle = '#ff9b33';
-      else ctx.fillStyle = t.color;
-      ctx.fillRect(-14,-9,28,18);
-      ctx.fillStyle='#dfe5ed'; ctx.fillRect(-10,-6,10,6); ctx.fillRect(2,-6,8,6);
-      ctx.fillStyle='#1a1f27'; ctx.fillRect(-11,8,22,2);
-      ctx.fillStyle='#000'; ctx.fillRect(-12,-10,5,20); ctx.fillRect(7,-10,5,20);
-
+      ctx.save();
+      ctx.translate(pX, pY);
+      ctx.rotate(t.angle);
+      ctx.fillStyle = t.crashed ? '#ff9b33' : t.color;
+      ctx.fillRect(-14, -9, 28, 18);
+      ctx.fillStyle = '#e8edf3';
+      ctx.fillRect(-10, -6, 10, 6);
+      ctx.fillRect(2, -6, 8, 6);
+      ctx.fillStyle = '#20262c';
+      ctx.fillRect(-11, 8, 22, 2);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-12, -10, 5, 20);
+      ctx.fillRect(7, -10, 5, 20);
       if (t.load > 0) {
-        ctx.fillStyle='#fff'; ctx.font='bold 9px Arial'; ctx.textAlign='center';
-        ctx.fillText(String(t.load), 0, -13);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(String(t.load), -4, -13);
       }
-
       if (t.crashed) {
-        ctx.strokeStyle='#ff2e2e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0,0,20,0,Math.PI*2); ctx.stroke();
+        ctx.strokeStyle = '#ff2e2e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.stroke();
       }
-
       ctx.restore();
     }
   }
 
-  function drawGridOverlay(minX,minY,maxX,maxY) {
-    ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 1;
-    for (let x=minX; x<=maxX; x+=2) { const sx = worldToScreenX(x*TILE); ctx.beginPath(); ctx.moveTo(sx,0); ctx.lineTo(sx,window.innerHeight); ctx.stroke(); }
-    for (let y=minY; y<=maxY; y+=2) { const sy = worldToScreenY(y*TILE); ctx.beginPath(); ctx.moveTo(0,sy); ctx.lineTo(window.innerWidth,sy); ctx.stroke(); }
+  function drawGridOverlay(minX, minY, maxX, maxY) {
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)';
+    ctx.lineWidth = 1;
+    for (let x = minX; x <= maxX; x += 2) {
+      const sx = worldToScreenX(x * TILE);
+      ctx.beginPath();
+      ctx.moveTo(sx, 0);
+      ctx.lineTo(sx, window.innerHeight);
+      ctx.stroke();
+    }
+    for (let y = minY; y <= maxY; y += 2) {
+      const sy = worldToScreenY(y * TILE);
+      ctx.beginPath();
+      ctx.moveTo(0, sy);
+      ctx.lineTo(window.innerWidth, sy);
+      ctx.stroke();
+    }
   }
 
   function drawHover() {
     const sx = worldToScreenX(mouse.tileX * TILE), sy = worldToScreenY(mouse.tileY * TILE);
-    ctx.save(); ctx.translate(sx, sy);
-
+    ctx.save();
+    ctx.translate(sx, sy);
     if (selectedTool !== 'delete') {
-      const canAfford = money >= (selectedTool==='bridge'?80:(selectedTool==='station'?STATION_COST:(selectedTool==='signal'?SIGNAL_COST:20)));
-      ctx.strokeStyle = canAfford ? 'rgba(100,213,255,0.8)' : 'rgba(255,87,87,0.8)';
-      ctx.lineWidth = 2; ctx.strokeRect(1,1,TILE-2,TILE-2);
-      ctx.fillStyle = lineColors[selectedLine]; ctx.globalAlpha = 0.3;
-
+      ctx.strokeStyle = money >= (selectedTool === 'bridge' ? 80 : 20) ? 'rgba(0, 212, 255, 0.7)' : 'rgba(255, 90, 90, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, TILE - 2, TILE - 2);
+      ctx.fillStyle = lineColors[selectedLine];
+      ctx.globalAlpha = 0.3;
       if (selectedTool === 'straight' || selectedTool === 'bridge') {
-        const h=(rotation&1)===0;
-        if (h) ctx.fillRect(2,14,28,4); else ctx.fillRect(14,2,4,28);
+        const h = (rotation & 1) === 0;
+        if (h) ctx.fillRect(2, 14, 28, 4);
+        else ctx.fillRect(14, 2, 4, 28);
       } else if (selectedTool === 'curve') {
-        ctx.strokeStyle=lineColors[selectedLine];
-        ctx.lineWidth=4;
-        ctx.lineCap='round';
+        ctx.strokeStyle = lineColors[selectedLine];
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        switch(rotation&3){
-          case 0: ctx.moveTo(16,2); ctx.quadraticCurveTo(16,16,30,16); break;
-          case 1: ctx.moveTo(30,16); ctx.quadraticCurveTo(16,16,16,30); break;
-          case 2: ctx.moveTo(16,30); ctx.quadraticCurveTo(16,16,2,16); break;
-          case 3: ctx.moveTo(2,16); ctx.quadraticCurveTo(16,16,16,2); break;
+        switch (rotation & 3) {
+          case 0:
+            ctx.moveTo(16, 2);
+            ctx.quadraticCurveTo(16, 16, 30, 16);
+            break;
+          case 1:
+            ctx.moveTo(30, 16);
+            ctx.quadraticCurveTo(16, 16, 16, 30);
+            break;
+          case 2:
+            ctx.moveTo(16, 30);
+            ctx.quadraticCurveTo(16, 16, 2, 16);
+            break;
+          case 3:
+            ctx.moveTo(2, 16);
+            ctx.quadraticCurveTo(16, 16, 16, 2);
+            break;
         }
         ctx.stroke();
       } else if (selectedTool === 'station') {
-        ctx.fillRect(6,6,20,20);
-      } else if (selectedTool === 'signal') {
-        ctx.fillStyle = '#333'; ctx.globalAlpha = 0.5; ctx.fillRect(-6,-10,12,20);
+        ctx.fillRect(6, 6, 20, 20);
       }
       ctx.globalAlpha = 1;
     } else {
-      ctx.strokeStyle='rgba(255,87,87,0.8)'; ctx.lineWidth=3;
-      ctx.beginPath(); ctx.moveTo(4,4); ctx.lineTo(28,28); ctx.moveTo(28,4); ctx.lineTo(4,28); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255, 80, 80, 0.8)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(4, 4);
+      ctx.lineTo(28, 28);
+      ctx.moveTo(28, 4);
+      ctx.lineTo(4, 28);
+      ctx.stroke();
     }
     ctx.restore();
   }
 
-  const physicsStep = 1/60;
+  function updateStats() {
+    const activeCounts = { red: 0, blue: 0, yellow: 0 };
+    for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line] || 0) + 1;
+    const linesHtml = lineKeys.map(line => `
+      <div class="stats-row">
+        <span class="stats-label"><span class="chip" style="background: ${lineColors[line]};"></span>${line[0].toUpperCase() + line.slice(1)}</span>
+        <span class="stats-value">${builtCounts[line]} / ${trainStock[line]} / ${activeCounts[line]}</span>
+      </div>
+    `).join('');
+    statsEl.innerHTML = `
+      <div class="stats-row">
+        <span class="stats-label">Money</span>
+        <span class="stats-value">$${money.toFixed(0)}</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Income</span>
+        <span class="stats-value">+$${(workers * 5).toFixed(0)}/s</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Workers</span>
+        <span class="stats-value">${workers}</span>
+      </div>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0, 212, 255, 0.1);">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">TRAINS</div>
+        ${linesHtml}
+      </div>
+    `;
+  }
+
+  const physicsStep = 1 / 60;
   const maxStepsPerFrame = 4;
   let accumulator = 0;
   let lastTime = performance.now() / 1000;
 
   function physicsUpdate(dt) {
-    for (const t of trains) { t.prevX = t.x; t.prevY = t.y; }
+    for (const t of trains) {
+      t.prevX = t.x;
+      t.prevY = t.y;
+    }
     updatePlayer(dt);
     updateEconomy(dt);
     updateStations(dt);
     for (const train of trains) resolveTrainMotion(train, dt);
     updateCollisions();
+    gameTime += dt;
   }
 
   function render(alpha) {
     const W = window.innerWidth, H = window.innerHeight;
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, W, H);
     updateCamera();
     loadVisibleChunks();
 
-    const minX = Math.floor((camera.x - W/2) / TILE) - 2, maxX = Math.floor((camera.x + W/2) / TILE) + 2;
-    const minY = Math.floor((camera.y - H/2) / TILE) - 2, maxY = Math.floor((camera.y + H/2) / TILE) + 2;
+    const minX = Math.floor((camera.x - W / 2) / TILE) - 2, maxX = Math.floor((camera.x + W / 2) / TILE) + 2;
+    const minY = Math.floor((camera.y - H / 2) / TILE) - 2, maxY = Math.floor((camera.y + H / 2) / TILE) + 2;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillRect(0, 0, W, H);
 
-    const cminCX = Math.floor(minX/CHUNK), cmaxCX = Math.floor(maxX/CHUNK);
-    const cminCY = Math.floor(minY/CHUNK), cmaxCY = Math.floor(maxY/CHUNK);
-    for (let cy=cminCY; cy<=cmaxCY; cy++) {
-      for (let cx=cminCX; cx<=cmaxCX; cx++) {
-        const chunk = generateChunk(cx,cy);
+    const cminCX = Math.floor(minX / CHUNK), cmaxCX = Math.floor(maxX / CHUNK);
+    const cminCY = Math.floor(minY / CHUNK), cmaxCY = Math.floor(maxY / CHUNK);
+    for (let cy = cminCY; cy <= cmaxCY; cy++) {
+      for (let cx = cminCX; cx <= cmaxCX; cx++) {
+        const chunk = generateChunk(cx, cy);
         if (!chunk || !chunk.canvas) continue;
         const sx = worldToScreenX(cx * CHUNK * TILE), sy = worldToScreenY(cy * CHUNK * TILE);
         ctx.drawImage(chunk.canvas, sx, sy, CHUNK * TILE, CHUNK * TILE);
       }
     }
 
-    drawBuiltObjects(minX,minY,maxX,maxY);
-    drawGridOverlay(minX,minY,maxX,maxY);
+    drawBuiltObjects(minX, minY, maxX, maxY);
+    drawGridOverlay(minX, minY, maxX, maxY);
     drawTrains(alpha);
     drawHover();
 
     const fX = worldToScreenX(0), fY = worldToScreenY(0);
     if (fX > -80 && fX < W + 80 && fY > -80 && fY < H + 80) {
-      ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(fX - 48, fY - 38, 96, 20);
-      ctx.fillStyle = '#ffd93d'; ctx.font = 'bold 13px Arial'; ctx.textAlign='center'; ctx.fillText('🏭 Factory', fX, fY - 24);
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+      ctx.fillRect(fX - 44, fY - 36, 88, 72);
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(fX - 44, fY - 36, 88, 72);
+      ctx.fillStyle = '#00d4ff';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Factory', fX, fY - 20);
     }
 
     const terrain = getTerrainAt(mouse.tileX, mouse.tileY);
     const piece = builtObjects.get(hoveredKey);
-    footerEl.textContent = piece ? `[${mouse.tileX},${mouse.tileY}] ${piece.type.toUpperCase()} (${piece.line})` : `[${mouse.tileX},${mouse.tileY}] ${terrain} | Click to build`;
+    footerEl.textContent = piece
+      ? `Tile (${mouse.tileX}, ${mouse.tileY}) | ${piece.type} (${piece.line})`
+      : `Tile (${mouse.tileX}, ${mouse.tileY}) | ${terrain}`;
 
-    updateStatsDisplay();
+    updateStats();
   }
 
   function loop() {
@@ -882,7 +1549,10 @@
     frameTime = Math.min(frameTime, 0.25);
     accumulator += frameTime;
 
-    for (const t of trains) if (t.prevX === undefined) { t.prevX = t.x; t.prevY = t.y; }
+    for (const t of trains) if (t.prevX === undefined) {
+      t.prevX = t.x;
+      t.prevY = t.y;
+    }
 
     let steps = 0;
     while (accumulator >= physicsStep && steps < maxStepsPerFrame) {
@@ -897,9 +1567,13 @@
 
   function updateMouse(ev) {
     const rect = canvas.getBoundingClientRect();
-    mouse.x = ev.clientX - rect.left; mouse.y = ev.clientY - rect.top;
-    const wx = mouse.x + camera.x - window.innerWidth/2, wy = mouse.y + camera.y - window.innerHeight/2;
-    mouse.worldX = wx; mouse.worldY = wy; mouse.tileX = Math.floor(wx / TILE); mouse.tileY = Math.floor(wy / TILE);
+    mouse.x = ev.clientX - rect.left;
+    mouse.y = ev.clientY - rect.top;
+    const wx = mouse.x + camera.x - window.innerWidth / 2, wy = mouse.y + camera.y - window.innerHeight / 2;
+    mouse.worldX = wx;
+    mouse.worldY = wy;
+    mouse.tileX = Math.floor(wx / TILE);
+    mouse.tileY = Math.floor(wy / TILE);
     hoveredKey = keyFor(mouse.tileX, mouse.tileY);
   }
 
@@ -910,65 +1584,110 @@
   canvas.addEventListener('contextmenu', ev => {
     ev.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    const worldX = ev.clientX - rect.left + camera.x - window.innerWidth/2;
-    const worldY = ev.clientY - rect.top + camera.y - window.innerHeight/2;
+    const worldX = ev.clientX - rect.left + camera.x - window.innerWidth / 2;
+    const worldY = ev.clientY - rect.top + camera.y - window.innerHeight / 2;
     const tx = Math.floor(worldX / TILE), ty = Math.floor(worldY / TILE);
-    if (tx === 0 && ty === 0) showFactoryMenu(); else hideFactoryMenu();
+    if (tx === 0 && ty === 0) showFactoryMenu();
+    else hideFactoryMenu();
   });
 
   window.addEventListener('keydown', e => {
     keys.add(e.code);
-    if (e.code === 'KeyR') { rotation = (rotation + 1) & 3; flash(`Rotated to ${rotation*90}°`); }
-    if (e.code === 'Digit1') { selectedTool='straight'; refreshButtons(); }
-    if (e.code === 'Digit2') { selectedTool='curve'; refreshButtons(); }
-    if (e.code === 'Digit3') { selectedTool='station'; refreshButtons(); }
-    if (e.code === 'Digit4') { selectedTool='bridge'; refreshButtons(); }
-    if (e.code === 'Digit5') { selectedTool='delete'; refreshButtons(); }
-    if (e.code === 'Digit6') { selectedTool='signal'; refreshButtons(); }
-    if (e.code === 'KeyQ') { selectedLine = lineKeys[(lineKeys.indexOf(selectedLine)+2)%3]; refreshButtons(); }
-    if (e.code === 'KeyE') { selectedLine = lineKeys[(lineKeys.indexOf(selectedLine)+1)%3]; refreshButtons(); }
+    if (e.code === 'KeyR') {
+      rotation = (rotation + 1) & 3;
+      flash(`Rotated to ${rotation * 90}°`);
+    }
+    if (e.code === 'Digit1') {
+      selectedTool = 'straight';
+      refreshButtons();
+    }
+    if (e.code === 'Digit2') {
+      selectedTool = 'curve';
+      refreshButtons();
+    }
+    if (e.code === 'Digit3') {
+      selectedTool = 'station';
+      refreshButtons();
+    }
+    if (e.code === 'Digit4') {
+      selectedTool = 'bridge';
+      refreshButtons();
+    }
+    if (e.code === 'Digit5') {
+      selectedTool = 'delete';
+      refreshButtons();
+    }
+    if (e.code === 'KeyQ') {
+      selectedLine = lineKeys[(lineKeys.indexOf(selectedLine) + 2) % 3];
+      refreshButtons();
+    }
+    if (e.code === 'KeyE') {
+      selectedLine = lineKeys[(lineKeys.indexOf(selectedLine) + 1) % 3];
+      refreshButtons();
+    }
   });
   window.addEventListener('keyup', e => keys.delete(e.code));
 
-  // Tool button events
-  document.getElementById('tool-straight').addEventListener('click', ()=>{ selectedTool='straight'; refreshButtons(); });
-  document.getElementById('tool-curve').addEventListener('click', ()=>{ selectedTool='curve'; refreshButtons(); });
-  document.getElementById('tool-station').addEventListener('click', ()=>{ selectedTool='station'; refreshButtons(); });
-  document.getElementById('tool-bridge').addEventListener('click', ()=>{ selectedTool='bridge'; refreshButtons(); });
-  document.getElementById('tool-delete').addEventListener('click', ()=>{ selectedTool='delete'; refreshButtons(); });
-  document.getElementById('tool-signal').addEventListener('click', ()=>{ selectedTool='signal'; refreshButtons(); });
-
-  // Line color events
-  document.getElementById('line-red').addEventListener('click', ()=>{ selectedLine='red'; refreshButtons(); });
-  document.getElementById('line-blue').addEventListener('click', ()=>{ selectedLine='blue'; refreshButtons(); });
-  document.getElementById('line-yellow').addEventListener('click', ()=>{ selectedLine='yellow'; refreshButtons(); });
-
-  // Other button events
-  document.getElementById('rotate').addEventListener('click', ()=>{ rotation = (rotation+1)&3; flash(`Rotated to ${rotation*90}°`); });
-  document.getElementById('hire-worker').addEventListener('click', ()=>{
-    if (money < 10) return flash('Not enough money');
-    money -= 10; workers += 1; updateStatsDisplay(); flash('Hired a worker');
+  // Button event listeners
+  document.getElementById('tool-straight').addEventListener('click', () => {
+    selectedTool = 'straight';
+    refreshButtons();
   });
-  document.getElementById('center').addEventListener('click', ()=>{ player.x = 0; player.y = 0; camera.x = 0; camera.y = 0; });
+  document.getElementById('tool-curve').addEventListener('click', () => {
+    selectedTool = 'curve';
+    refreshButtons();
+  });
+  document.getElementById('tool-station').addEventListener('click', () => {
+    selectedTool = 'station';
+    refreshButtons();
+  });
+  document.getElementById('tool-bridge').addEventListener('click', () => {
+    selectedTool = 'bridge';
+    refreshButtons();
+  });
+  document.getElementById('tool-delete').addEventListener('click', () => {
+    selectedTool = 'delete';
+    refreshButtons();
+  });
+  document.getElementById('line-red').addEventListener('click', () => {
+    selectedLine = 'red';
+    refreshButtons();
+  });
+  document.getElementById('line-blue').addEventListener('click', () => {
+    selectedLine = 'blue';
+    refreshButtons();
+  });
+  document.getElementById('line-yellow').addEventListener('click', () => {
+    selectedLine = 'yellow';
+    refreshButtons();
+  });
+  document.getElementById('rotate').addEventListener('click', () => {
+    rotation = (rotation + 1) & 3;
+    flash(`Rotated to ${rotation * 90}°`);
+  });
+  document.getElementById('hire-worker').addEventListener('click', () => {
+    if (money < 10) return flash('Not enough money');
+    money -= 10;
+    workers += 1;
+    flash('Hired a worker');
+  });
+  document.getElementById('center').addEventListener('click', () => {
+    player.x = 0;
+    player.y = 0;
+    camera.x = 0;
+    camera.y = 0;
+  });
 
-  // Menu toggle
-  let buildMenuHidden = false;
-  toggleBuildMenu.addEventListener('click', () => {
-    buildMenuHidden = !buildMenuHidden;
-    if (buildMenuHidden) {
-      buildMenuEl.style.display = "none";
-      toggleBuildMenu.setAttribute('data-state', '▶');
-    } else {
-      buildMenuEl.style.display = "block";
-      toggleBuildMenu.setAttribute('data-state', '▼');
-    }
+  // Panel toggle functionality
+  toggleBtn.addEventListener('click', () => {
+    buildPanel.classList.toggle('hidden');
+    toggleBtn.textContent = buildPanel.classList.contains('hidden') ? '◀' : '►';
   });
 
   document.getElementById('close-factory-menu').addEventListener('click', hideFactoryMenu);
 
   refreshButtons();
-  updateStatsDisplay();
-  flash('🚂 Build a line from the factory. Right-click factory to buy trains.');
+  flash('Build a line from the factory. Right-click the factory to buy and deploy trains.');
   requestAnimationFrame(loop);
 })();
 </script>
