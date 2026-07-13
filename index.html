@@ -85,13 +85,10 @@
       top: 50%; 
       transform: translate(-50%, -50%); 
       width: 420px; 
-      max-height: 90vh;
-      padding: 0;
+      padding: 24px; 
       pointer-events: auto; 
       z-index: 20;
       animation: slideIn 0.3s ease;
-      display: flex;
-      flex-direction: column;
     }
 
     @keyframes slideIn {
@@ -122,12 +119,9 @@
       left: 12px;
       top: 12px;
       width: 380px;
-      max-height: 90vh;
       pointer-events: auto;
       z-index: 15;
       transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
     }
 
     .build-panel.hidden {
@@ -135,45 +129,13 @@
       pointer-events: none;
     }
 
-    .panel {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
     .panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
-      padding: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-      flex-shrink: 0;
-    }
-
-    .panel-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 16px;
-      min-height: 0;
-    }
-
-    .panel-content::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .panel-content::-webkit-scrollbar-track {
-      background: rgba(0, 212, 255, 0.05);
-      border-radius: 3px;
-    }
-
-    .panel-content::-webkit-scrollbar-thumb {
-      background: rgba(0, 212, 255, 0.3);
-      border-radius: 3px;
-    }
-
-    .panel-content::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 212, 255, 0.5);
     }
 
     .panel-toggle {
@@ -309,10 +271,9 @@
       border: 1px solid rgba(0, 212, 255, 0.1);
       border-radius: 8px;
       padding: 12px;
-      margin: 16px;
+      margin-top: 16px;
       font-size: 12px;
       line-height: 1.8;
-      flex-shrink: 0;
     }
 
     .stats-row {
@@ -335,13 +296,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 24px 12px 24px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-      flex-shrink: 0;
-    }
-
-    .menu-title h1 {
-      margin: 0;
     }
 
     button.close-btn {
@@ -356,49 +313,17 @@
       background: rgba(255, 90, 90, 0.2);
     }
 
-    .menu-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      min-height: 0;
-    }
-
-    .menu-body::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .menu-body::-webkit-scrollbar-track {
-      background: rgba(0, 212, 255, 0.05);
-      border-radius: 3px;
-    }
-
-    .menu-body::-webkit-scrollbar-thumb {
-      background: rgba(0, 212, 255, 0.3);
-      border-radius: 3px;
-    }
-
-    .menu-body::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 212, 255, 0.5);
-    }
-
     .menu-section {
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
     .menu-section h3 {
-      margin: 0 0 12px 0;
+      margin: 0 0 10px 0;
       font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 1px;
-    }
-
-    .menu-section p {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.6;
-      color: var(--text-muted);
     }
 
     .section-content {
@@ -410,7 +335,7 @@
     .line-info {
       display: flex;
       justify-content: space-between;
-      padding: 10px;
+      padding: 8px;
       background: rgba(255, 255, 255, 0.03);
       border-radius: 6px;
       font-size: 12px;
@@ -425,7 +350,7 @@
     .separator {
       height: 1px;
       background: rgba(0, 212, 255, 0.1);
-      margin: 16px 0;
+      margin: 12px 0;
     }
 
     /* Animations */
@@ -446,6 +371,29 @@
     .float {
       animation: float 3s ease-in-out infinite;
     }
+
+    .scroll-content {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .scroll-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scroll-content::-webkit-scrollbar-track {
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    .scroll-content::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .scroll-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 212, 255, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -456,84 +404,84 @@
   <div class="build-panel" id="build-panel">
     <div class="panel">
       <div class="panel-header">
-        <h1>Build Menu</h1>
-      </div>
-
-      <div class="panel-content">
-        <!-- Tools Grid -->
-        <h2>Tools</h2>
-        <div class="grid">
-          <button id="tool-straight" class="active" title="Straight Track (1)">
-            <span class="button-icon">—</span>
-            <span class="button-label">Straight</span>
-          </button>
-          <button id="tool-curve" title="Curve Track (2)">
-            <span class="button-icon">⤵</span>
-            <span class="button-label">Curve</span>
-          </button>
-        </div>
-
-        <div class="grid">
-          <button id="tool-station" title="Station (3)">
-            <span class="button-icon">◆</span>
-            <span class="button-label">Station</span>
-          </button>
-          <button id="tool-bridge" title="Bridge (4)">
-            <span class="button-icon">╫</span>
-            <span class="button-label">Bridge</span>
-          </button>
-        </div>
-
-        <div class="grid full">
-          <button id="tool-delete" class="danger" title="Delete (5)">
-            <span class="button-icon">✕</span>
-            <span class="button-label">Delete</span>
-          </button>
-        </div>
-
-        <div class="separator"></div>
-
-        <!-- Line Colors -->
-        <h2>Line Color</h2>
-        <div class="grid wide">
-          <button id="line-red" class="active" title="Red Line (Q)">
-            <span class="chip" style="background: var(--red-line);"></span>
-            <span class="button-label">Red</span>
-          </button>
-          <button id="line-blue" title="Blue Line">
-            <span class="chip" style="background: var(--blue-line);"></span>
-            <span class="button-label">Blue</span>
-          </button>
-          <button id="line-yellow" title="Yellow Line (E)">
-            <span class="chip" style="background: var(--yellow-line);"></span>
-            <span class="button-label">Yellow</span>
-          </button>
-        </div>
-
-        <div class="separator"></div>
-
-        <!-- Actions -->
-        <h2>Actions</h2>
-        <div class="grid">
-          <button id="rotate" title="Rotate (R)">
-            <span class="button-icon">↻</span>
-            <span class="button-label">Rotate</span>
-          </button>
-          <button id="hire-worker" class="success" title="Hire Worker">
-            <span class="button-icon">👤</span>
-            <span class="button-label">Hire</span>
-          </button>
-        </div>
-
-        <div class="grid full">
-          <button id="center" title="Center on Factory">
-            <span class="button-icon">⊕</span>
-            <span class="button-label">Center</span>
-          </button>
+        <div>
+          <h1>Build Menu</h1>
         </div>
       </div>
 
-      <!-- Stats (fixed at bottom) -->
+      <!-- Tools Grid -->
+      <h2>Tools</h2>
+      <div class="grid">
+        <button id="tool-straight" class="active" title="Straight Track (1)">
+          <span class="button-icon">—</span>
+          <span class="button-label">Straight</span>
+        </button>
+        <button id="tool-curve" title="Curve Track (2)">
+          <span class="button-icon">⤵</span>
+          <span class="button-label">Curve</span>
+        </button>
+      </div>
+
+      <div class="grid">
+        <button id="tool-station" title="Station (3)">
+          <span class="button-icon">◆</span>
+          <span class="button-label">Station</span>
+        </button>
+        <button id="tool-bridge" title="Bridge (4)">
+          <span class="button-icon">╫</span>
+          <span class="button-label">Bridge</span>
+        </button>
+      </div>
+
+      <div class="grid full">
+        <button id="tool-delete" class="danger" title="Delete (5)">
+          <span class="button-icon">✕</span>
+          <span class="button-label">Delete</span>
+        </button>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Line Colors -->
+      <h2>Line Color</h2>
+      <div class="grid wide">
+        <button id="line-red" class="active" title="Red Line (Q)">
+          <span class="chip" style="background: var(--red-line);"></span>
+          <span class="button-label">Red</span>
+        </button>
+        <button id="line-blue" title="Blue Line">
+          <span class="chip" style="background: var(--blue-line);"></span>
+          <span class="button-label">Blue</span>
+        </button>
+        <button id="line-yellow" title="Yellow Line (E)">
+          <span class="chip" style="background: var(--yellow-line);"></span>
+          <span class="button-label">Yellow</span>
+        </button>
+      </div>
+
+      <div class="separator"></div>
+
+      <!-- Actions -->
+      <h2>Actions</h2>
+      <div class="grid">
+        <button id="rotate" title="Rotate (R)">
+          <span class="button-icon">↻</span>
+          <span class="button-label">Rotate</span>
+        </button>
+        <button id="hire-worker" class="success" title="Hire Worker">
+          <span class="button-icon">👤</span>
+          <span class="button-label">Hire</span>
+        </button>
+      </div>
+
+      <div class="grid full">
+        <button id="center" title="Center on Factory">
+          <span class="button-icon">⊕</span>
+          <span class="button-label">Center</span>
+        </button>
+      </div>
+
+      <!-- Stats -->
       <div class="stats" id="stats"></div>
     </div>
   </div>
@@ -559,10 +507,10 @@
   <!-- Factory Menu -->
   <div id="factory-menu" class="menu">
     <div class="menu-title">
-      <h1>Factory</h1>
+      <h1 style="margin: 0;">Factory</h1>
       <button id="close-factory-menu" class="close-btn">✕</button>
     </div>
-    <div class="menu-body" id="factory-menu-body"></div>
+    <div class="scroll-content" id="factory-menu-body"></div>
   </div>
 </div>
 
@@ -915,7 +863,9 @@
     factoryMenuBody.innerHTML = `
       <div class="menu-section">
         <h3>Information</h3>
-        <p>Buy trains and deploy them onto track tiles next to the factory. Trains earn money by passing stations.</p>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: var(--text-muted);">
+          Buy trains and deploy them onto track tiles next to the factory. Trains earn money by passing stations.
+        </p>
       </div>
 
       <div class="menu-section">
@@ -958,7 +908,7 @@
         </div>
       </div>
 
-      <div style="padding: 12px; background: rgba(0, 212, 255, 0.05); border-radius: 6px; font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+      <div style="margin-top: 16px; padding: 10px; background: rgba(0, 212, 255, 0.05); border-radius: 6px; font-size: 12px; color: var(--text-muted);">
         A track tile must be adjacent to the factory to deploy trains.
       </div>
     `;
@@ -967,7 +917,7 @@
   }
 
   function showFactoryMenu() { 
-    factoryMenu.style.display = 'flex'; 
+    factoryMenu.style.display = 'block'; 
     renderFactoryMenu(); 
   }
 
@@ -1048,4 +998,698 @@
     }
     return dirs[0] || null;
   }
-[...]
+
+  function boardPassengers(train, wx, wy, dt) {
+    const st = stations.get(keyFor(wx, wy));
+    if (!st) return;
+    st.waiting += (1.2 + workers * 0.25) * dt;
+    const canBoard = Math.max(0, train.capacity - train.load);
+    const boarded = Math.min(canBoard, Math.floor(st.waiting));
+    if (boarded > 0) {
+      st.waiting -= boarded;
+      train.load += boarded;
+      const fare = boarded * (2 + workers * 0.1);
+      money += fare;
+      train.paused = 0.15;
+      flash(`+$${fare.toFixed(0)} (${boarded} passengers)`);
+    }
+  }
+
+  function unloadMaybe(train, wx, wy) {
+    if (stations.has(keyFor(wx, wy)) && train.load > 0) train.load = 0;
+  }
+
+  function resolveTrainMotion(train, dt) {
+    if (!train.deployed) return;
+    if (train.crashed) {
+      train.crashT -= dt;
+      train.x += train.vx * dt;
+      train.y += train.vy * dt;
+      train.vx *= 0.985;
+      train.vy *= 0.985;
+      if (train.crashT <= 0) {
+        train.crashed = false;
+        train.vx = 0;
+        train.vy = 0;
+        train.paused = 0.5;
+      }
+      return;
+    }
+    if (train.paused > 0) {
+      train.paused -= dt;
+      return;
+    }
+    const targetX = train.toX * TILE, targetY = train.toY * TILE;
+    const dx = targetX - train.x, dy = targetY - train.y;
+    const dist = Math.hypot(dx, dy);
+    const speed = train.targetSpeed;
+    if (dist <= speed * dt || dist < 2) {
+      train.x = targetX;
+      train.y = targetY;
+      train.fromX = train.toX;
+      train.fromY = train.toY;
+
+      const neighbors = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
+      const newlyAdjacent = [];
+      for (const n of neighbors) {
+        const k = keyFor(train.toX + n.dx, train.toY + n.dy);
+        if (stations.has(k) && !(train.nearbyStations && train.nearbyStations.has(k))) {
+          newlyAdjacent.push(k);
+        }
+      }
+      if (newlyAdjacent.length) {
+        const amount = 20 * newlyAdjacent.length;
+        money += amount;
+        train.nearbyStations = train.nearbyStations || new Set();
+        for (const k of newlyAdjacent) train.nearbyStations.add(k);
+        flash(`+$${amount} (passed station)`);
+      }
+      const currentAdj = new Set();
+      for (const n of neighbors) {
+        const k = keyFor(train.toX + n.dx, train.toY + n.dy);
+        if (stations.has(k)) currentAdj.add(k);
+      }
+      train.nearbyStations = currentAdj;
+
+      const piece = builtObjects.get(keyFor(train.toX, train.toY));
+      if (!piece || piece.line !== train.line) {
+        train.deployed = false;
+        train.nearbyStations = new Set();
+        flash(`${train.line} train stopped: track ended.`);
+        return;
+      }
+      boardPassengers(train, train.toX, train.toY, dt);
+      unloadMaybe(train, train.toX, train.toY);
+
+      let next = chooseNextDir(train, train.toX, train.toY);
+      if (!next) {
+        const reverse = [-train.dirX, -train.dirY];
+        const reversePiece = builtObjects.get(keyFor(train.toX + reverse[0], train.toY + reverse[1]));
+        if (!reversePiece || reversePiece.line !== train.line) {
+          train.deployed = false;
+          train.nearbyStations = new Set();
+          flash(`${train.line} train stopped: no track to continue.`);
+          return;
+        }
+        train.dirX = reverse[0];
+        train.dirY = reverse[1];
+      } else {
+        train.dirX = next[0];
+        train.dirY = next[1];
+      }
+      train.toX = train.fromX + train.dirX;
+      train.toY = train.fromY + train.dirY;
+      train.angle = Math.atan2(train.dirY, train.dirX);
+      return;
+    }
+    const nx = dx / dist, ny = dy / dist;
+    train.x += nx * speed * dt;
+    train.y += ny * speed * dt;
+    train.angle = Math.atan2(ny, nx);
+  }
+
+  function crashTrains(a, b) {
+    if (a.crashed && b.crashed) return;
+    const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.001;
+    const nx = dx / dist, ny = dy / dist, impulse = 180;
+    a.vx = -nx * impulse;
+    a.vy = -ny * impulse;
+    b.vx = nx * impulse;
+    b.vy = ny * impulse;
+    a.crashed = b.crashed = true;
+    a.crashT = b.crashT = 2.2;
+    a.load = 0;
+    b.load = 0;
+    money = Math.max(0, money - 15);
+    flash('Train crash! -$15');
+  }
+
+  function updateCollisions() {
+    const BUCKET = 64;
+    const buckets = new Map();
+    const bk = (x, y) => (x | 0) + '|' + (y | 0);
+    for (const t of trains) {
+      if (!t.deployed || t.crashed) continue;
+      const bx = Math.floor(t.x / BUCKET), by = Math.floor(t.y / BUCKET);
+      const key = bk(bx, by);
+      let a = buckets.get(key);
+      if (!a) { a = []; buckets.set(key, a); }
+      a.push(t);
+    }
+    for (const [k, arr] of buckets) {
+      const [bx, by] = k.split('|').map(Number);
+      for (const t of arr) {
+        for (let ox = -1; ox <= 1; ox++) {
+          for (let oy = -1; oy <= 1; oy++) {
+            const other = buckets.get(bk(bx + ox, by + oy));
+            if (!other) continue;
+            for (const o of other) {
+              if (o === t) continue;
+              if (!o.deployed || !t.deployed) continue;
+              if (o.line === t.line) continue;
+              const dx = o.x - t.x, dy = o.y - t.y;
+              if (dx * dx + dy * dy < 20 * 20) crashTrains(t, o);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function updateStations(dt) {
+    for (const st of stations.values()) st.waiting = Math.min(120, st.waiting + (0.35 + workers * 0.12) * dt);
+  }
+
+  function updateEconomy(dt) {
+    money += workers * 5 * dt;
+  }
+
+  function updatePlayer(dt) {
+    const up = keys.has('KeyW') || keys.has('ArrowUp');
+    const down = keys.has('KeyS') || keys.has('ArrowDown');
+    const left = keys.has('KeyA') || keys.has('ArrowLeft');
+    const right = keys.has('KeyD') || keys.has('ArrowRight');
+    let dx = 0, dy = 0;
+    if (up) dy -= 1;
+    if (down) dy += 1;
+    if (left) dx -= 1;
+    if (right) dx += 1;
+    const len = Math.hypot(dx, dy) || 1;
+    player.x += (dx / len) * player.speed * dt;
+    player.y += (dy / len) * player.speed * dt;
+  }
+
+  function updateCamera() {
+    camera.x = player.x;
+    camera.y = player.y;
+  }
+
+  function worldToScreenX(wx) {
+    return wx - camera.x + window.innerWidth / 2;
+  }
+
+  function worldToScreenY(wy) {
+    return wy - camera.y + window.innerHeight / 2;
+  }
+
+  function loadVisibleChunks() {
+    const viewW = window.innerWidth, viewH = window.innerHeight;
+    const minX = Math.floor((camera.x - viewW / 2) / TILE) - 2, maxX = Math.floor((camera.x + viewW / 2) / TILE) + 2;
+    const minY = Math.floor((camera.y - viewH / 2) / TILE) - 2, maxY = Math.floor((camera.y + viewH / 2) / TILE) + 2;
+    const cminX = Math.floor(minX / CHUNK), cmaxX = Math.floor(maxX / CHUNK);
+    const cminY = Math.floor(minY / CHUNK), cmaxY = Math.floor(maxY / CHUNK);
+    for (let cy = cminY; cy <= cmaxY; cy++) {
+      for (let cx = cminX; cx <= cmaxX; cx++) {
+        generateChunk(cx, cy);
+      }
+    }
+  }
+
+  function drawBuiltObjects(minX, minY, maxX, maxY) {
+    for (let wy = minY; wy <= maxY; wy++) {
+      for (let wx = minX; wx <= maxX; wx++) {
+        const obj = builtObjects.get(keyFor(wx, wy));
+        if (!obj) continue;
+        const sx = worldToScreenX(wx * TILE), sy = worldToScreenY(wy * TILE);
+        const color = lineColors[obj.line];
+        const cx = sx + TILE / 2, cy = sy + TILE / 2;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (obj.type === 'station') {
+          ctx.fillStyle = '#fff';
+          ctx.globalAlpha = 0.85;
+          ctx.fillRect(-11, -11, 22, 22);
+          ctx.globalAlpha = 1;
+          ctx.strokeRect(-12, -12, 24, 24);
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(0, 0, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (obj.type === 'bridge') {
+          ctx.strokeStyle = '#6d4f2f';
+          ctx.lineWidth = 6;
+          if ((obj.rot & 1) === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-14, 0);
+            ctx.lineTo(14, 0);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(0, -14);
+            ctx.lineTo(0, 14);
+            ctx.stroke();
+          }
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 3;
+          if ((obj.rot & 1) === 0) {
+            ctx.beginPath();
+            ctx.moveTo(-14, -5);
+            ctx.lineTo(14, -5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-14, 5);
+            ctx.lineTo(14, 5);
+            ctx.stroke();
+          } else {
+            ctx.beginPath();
+            ctx.moveTo(-5, -14);
+            ctx.lineTo(-5, 14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(5, -14);
+            ctx.lineTo(5, 14);
+            ctx.stroke();
+          }
+        } else if (obj.type === 'straight') {
+          const h = (obj.rot & 1) === 0;
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          h ? ctx.moveTo(-14, 0) : ctx.moveTo(0, -14);
+          h ? ctx.lineTo(14, 0) : ctx.lineTo(0, 14);
+          ctx.stroke();
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          if (h) {
+            ctx.moveTo(-14, -5);
+            ctx.lineTo(14, -5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(-14, 5);
+            ctx.lineTo(14, 5);
+          } else {
+            ctx.moveTo(-5, -14);
+            ctx.lineTo(-5, 14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(5, -14);
+            ctx.lineTo(5, 14);
+          }
+          ctx.stroke();
+        } else if (obj.type === 'curve') {
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          switch (obj.rot & 3) {
+            case 0:
+              ctx.moveTo(0, -14);
+              ctx.quadraticCurveTo(0, 0, 14, 0);
+              break;
+            case 1:
+              ctx.moveTo(14, 0);
+              ctx.quadraticCurveTo(0, 0, 0, 14);
+              break;
+            case 2:
+              ctx.moveTo(0, 14);
+              ctx.quadraticCurveTo(0, 0, -14, 0);
+              break;
+            case 3:
+              ctx.moveTo(-14, 0);
+              ctx.quadraticCurveTo(0, 0, 0, -14);
+              break;
+          }
+          ctx.stroke();
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          switch (obj.rot & 3) {
+            case 0:
+              ctx.moveTo(0, -10);
+              ctx.quadraticCurveTo(0, 0, 10, 0);
+              break;
+            case 1:
+              ctx.moveTo(10, 0);
+              ctx.quadraticCurveTo(0, 0, 0, 10);
+              break;
+            case 2:
+              ctx.moveTo(0, 10);
+              ctx.quadraticCurveTo(0, 0, -10, 0);
+              break;
+            case 3:
+              ctx.moveTo(-10, 0);
+              ctx.quadraticCurveTo(0, 0, 0, -10);
+              break;
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawTrains(alpha) {
+    for (const t of trains) {
+      const rx = lerp(t.prevX, t.x, alpha), ry = lerp(t.prevY, t.y, alpha);
+      const pX = worldToScreenX(rx), pY = worldToScreenY(ry);
+      ctx.save();
+      ctx.translate(pX, pY);
+      ctx.rotate(t.angle);
+      ctx.fillStyle = t.crashed ? '#ff9b33' : t.color;
+      ctx.fillRect(-14, -9, 28, 18);
+      ctx.fillStyle = '#e8edf3';
+      ctx.fillRect(-10, -6, 10, 6);
+      ctx.fillRect(2, -6, 8, 6);
+      ctx.fillStyle = '#20262c';
+      ctx.fillRect(-11, 8, 22, 2);
+      ctx.fillStyle = '#111';
+      ctx.fillRect(-12, -10, 5, 20);
+      ctx.fillRect(7, -10, 5, 20);
+      if (t.load > 0) {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(String(t.load), -4, -13);
+      }
+      if (t.crashed) {
+        ctx.strokeStyle = '#ff2e2e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 20, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawGridOverlay(minX, minY, maxX, maxY) {
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.04)';
+    ctx.lineWidth = 1;
+    for (let x = minX; x <= maxX; x += 2) {
+      const sx = worldToScreenX(x * TILE);
+      ctx.beginPath();
+      ctx.moveTo(sx, 0);
+      ctx.lineTo(sx, window.innerHeight);
+      ctx.stroke();
+    }
+    for (let y = minY; y <= maxY; y += 2) {
+      const sy = worldToScreenY(y * TILE);
+      ctx.beginPath();
+      ctx.moveTo(0, sy);
+      ctx.lineTo(window.innerWidth, sy);
+      ctx.stroke();
+    }
+  }
+
+  function drawHover() {
+    const sx = worldToScreenX(mouse.tileX * TILE), sy = worldToScreenY(mouse.tileY * TILE);
+    ctx.save();
+    ctx.translate(sx, sy);
+    if (selectedTool !== 'delete') {
+      ctx.strokeStyle = money >= (selectedTool === 'bridge' ? 80 : 20) ? 'rgba(0, 212, 255, 0.7)' : 'rgba(255, 90, 90, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, TILE - 2, TILE - 2);
+      ctx.fillStyle = lineColors[selectedLine];
+      ctx.globalAlpha = 0.3;
+      if (selectedTool === 'straight' || selectedTool === 'bridge') {
+        const h = (rotation & 1) === 0;
+        if (h) ctx.fillRect(2, 14, 28, 4);
+        else ctx.fillRect(14, 2, 4, 28);
+      } else if (selectedTool === 'curve') {
+        ctx.strokeStyle = lineColors[selectedLine];
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        switch (rotation & 3) {
+          case 0:
+            ctx.moveTo(16, 2);
+            ctx.quadraticCurveTo(16, 16, 30, 16);
+            break;
+          case 1:
+            ctx.moveTo(30, 16);
+            ctx.quadraticCurveTo(16, 16, 16, 30);
+            break;
+          case 2:
+            ctx.moveTo(16, 30);
+            ctx.quadraticCurveTo(16, 16, 2, 16);
+            break;
+          case 3:
+            ctx.moveTo(2, 16);
+            ctx.quadraticCurveTo(16, 16, 16, 2);
+            break;
+        }
+        ctx.stroke();
+      } else if (selectedTool === 'station') {
+        ctx.fillRect(6, 6, 20, 20);
+      }
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.strokeStyle = 'rgba(255, 80, 80, 0.8)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(4, 4);
+      ctx.lineTo(28, 28);
+      ctx.moveTo(28, 4);
+      ctx.lineTo(4, 28);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function updateStats() {
+    const activeCounts = { red: 0, blue: 0, yellow: 0 };
+    for (const t of trains) if (t.deployed) activeCounts[t.line] = (activeCounts[t.line] || 0) + 1;
+    const linesHtml = lineKeys.map(line => `
+      <div class="stats-row">
+        <span class="stats-label"><span class="chip" style="background: ${lineColors[line]};"></span>${line[0].toUpperCase() + line.slice(1)}</span>
+        <span class="stats-value">${builtCounts[line]} / ${trainStock[line]} / ${activeCounts[line]}</span>
+      </div>
+    `).join('');
+    statsEl.innerHTML = `
+      <div class="stats-row">
+        <span class="stats-label">Money</span>
+        <span class="stats-value">$${money.toFixed(0)}</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Income</span>
+        <span class="stats-value">+$${(workers * 5).toFixed(0)}/s</span>
+      </div>
+      <div class="stats-row">
+        <span class="stats-label">Workers</span>
+        <span class="stats-value">${workers}</span>
+      </div>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0, 212, 255, 0.1);">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">TRAINS</div>
+        ${linesHtml}
+      </div>
+    `;
+  }
+
+  const physicsStep = 1 / 60;
+  const maxStepsPerFrame = 4;
+  let accumulator = 0;
+  let lastTime = performance.now() / 1000;
+
+  function physicsUpdate(dt) {
+    for (const t of trains) {
+      t.prevX = t.x;
+      t.prevY = t.y;
+    }
+    updatePlayer(dt);
+    updateEconomy(dt);
+    updateStations(dt);
+    for (const train of trains) resolveTrainMotion(train, dt);
+    updateCollisions();
+    gameTime += dt;
+  }
+
+  function render(alpha) {
+    const W = window.innerWidth, H = window.innerHeight;
+    ctx.clearRect(0, 0, W, H);
+    updateCamera();
+    loadVisibleChunks();
+
+    const minX = Math.floor((camera.x - W / 2) / TILE) - 2, maxX = Math.floor((camera.x + W / 2) / TILE) + 2;
+    const minY = Math.floor((camera.y - H / 2) / TILE) - 2, maxY = Math.floor((camera.y + H / 2) / TILE) + 2;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillRect(0, 0, W, H);
+
+    const cminCX = Math.floor(minX / CHUNK), cmaxCX = Math.floor(maxX / CHUNK);
+    const cminCY = Math.floor(minY / CHUNK), cmaxCY = Math.floor(maxY / CHUNK);
+    for (let cy = cminCY; cy <= cmaxCY; cy++) {
+      for (let cx = cminCX; cx <= cmaxCX; cx++) {
+        const chunk = generateChunk(cx, cy);
+        if (!chunk || !chunk.canvas) continue;
+        const sx = worldToScreenX(cx * CHUNK * TILE), sy = worldToScreenY(cy * CHUNK * TILE);
+        ctx.drawImage(chunk.canvas, sx, sy, CHUNK * TILE, CHUNK * TILE);
+      }
+    }
+
+    drawBuiltObjects(minX, minY, maxX, maxY);
+    drawGridOverlay(minX, minY, maxX, maxY);
+    drawTrains(alpha);
+    drawHover();
+
+    const fX = worldToScreenX(0), fY = worldToScreenY(0);
+    if (fX > -80 && fX < W + 80 && fY > -80 && fY < H + 80) {
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+      ctx.fillRect(fX - 44, fY - 36, 88, 72);
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(fX - 44, fY - 36, 88, 72);
+      ctx.fillStyle = '#00d4ff';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Factory', fX, fY - 20);
+    }
+
+    const terrain = getTerrainAt(mouse.tileX, mouse.tileY);
+    const piece = builtObjects.get(hoveredKey);
+    footerEl.textContent = piece
+      ? `Tile (${mouse.tileX}, ${mouse.tileY}) | ${piece.type} (${piece.line})`
+      : `Tile (${mouse.tileX}, ${mouse.tileY}) | ${terrain}`;
+
+    updateStats();
+  }
+
+  function loop() {
+    const now = performance.now() / 1000;
+    let frameTime = now - lastTime;
+    lastTime = now;
+    frameTime = Math.min(frameTime, 0.25);
+    accumulator += frameTime;
+
+    for (const t of trains) if (t.prevX === undefined) {
+      t.prevX = t.x;
+      t.prevY = t.y;
+    }
+
+    let steps = 0;
+    while (accumulator >= physicsStep && steps < maxStepsPerFrame) {
+      physicsUpdate(physicsStep);
+      accumulator -= physicsStep;
+      steps++;
+    }
+    const alpha = Math.max(0, Math.min(1, accumulator / physicsStep));
+    render(alpha);
+    requestAnimationFrame(loop);
+  }
+
+  function updateMouse(ev) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ev.clientX - rect.left;
+    mouse.y = ev.clientY - rect.top;
+    const wx = mouse.x + camera.x - window.innerWidth / 2, wy = mouse.y + camera.y - window.innerHeight / 2;
+    mouse.worldX = wx;
+    mouse.worldY = wy;
+    mouse.tileX = Math.floor(wx / TILE);
+    mouse.tileY = Math.floor(wy / TILE);
+    hoveredKey = keyFor(mouse.tileX, mouse.tileY);
+  }
+
+  canvas.addEventListener('mousemove', updateMouse);
+  canvas.addEventListener('mousedown', ev => {
+    if (ev.button === 0) placeObject(mouse.tileX, mouse.tileY);
+  });
+  canvas.addEventListener('contextmenu', ev => {
+    ev.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const worldX = ev.clientX - rect.left + camera.x - window.innerWidth / 2;
+    const worldY = ev.clientY - rect.top + camera.y - window.innerHeight / 2;
+    const tx = Math.floor(worldX / TILE), ty = Math.floor(worldY / TILE);
+    if (tx === 0 && ty === 0) showFactoryMenu();
+    else hideFactoryMenu();
+  });
+
+  window.addEventListener('keydown', e => {
+    keys.add(e.code);
+    if (e.code === 'KeyR') {
+      rotation = (rotation + 1) & 3;
+      flash(`Rotated to ${rotation * 90}°`);
+    }
+    if (e.code === 'Digit1') {
+      selectedTool = 'straight';
+      refreshButtons();
+    }
+    if (e.code === 'Digit2') {
+      selectedTool = 'curve';
+      refreshButtons();
+    }
+    if (e.code === 'Digit3') {
+      selectedTool = 'station';
+      refreshButtons();
+    }
+    if (e.code === 'Digit4') {
+      selectedTool = 'bridge';
+      refreshButtons();
+    }
+    if (e.code === 'Digit5') {
+      selectedTool = 'delete';
+      refreshButtons();
+    }
+    if (e.code === 'KeyQ') {
+      selectedLine = lineKeys[(lineKeys.indexOf(selectedLine) + 2) % 3];
+      refreshButtons();
+    }
+    if (e.code === 'KeyE') {
+      selectedLine = lineKeys[(lineKeys.indexOf(selectedLine) + 1) % 3];
+      refreshButtons();
+    }
+  });
+  window.addEventListener('keyup', e => keys.delete(e.code));
+
+  // Button event listeners
+  document.getElementById('tool-straight').addEventListener('click', () => {
+    selectedTool = 'straight';
+    refreshButtons();
+  });
+  document.getElementById('tool-curve').addEventListener('click', () => {
+    selectedTool = 'curve';
+    refreshButtons();
+  });
+  document.getElementById('tool-station').addEventListener('click', () => {
+    selectedTool = 'station';
+    refreshButtons();
+  });
+  document.getElementById('tool-bridge').addEventListener('click', () => {
+    selectedTool = 'bridge';
+    refreshButtons();
+  });
+  document.getElementById('tool-delete').addEventListener('click', () => {
+    selectedTool = 'delete';
+    refreshButtons();
+  });
+  document.getElementById('line-red').addEventListener('click', () => {
+    selectedLine = 'red';
+    refreshButtons();
+  });
+  document.getElementById('line-blue').addEventListener('click', () => {
+    selectedLine = 'blue';
+    refreshButtons();
+  });
+  document.getElementById('line-yellow').addEventListener('click', () => {
+    selectedLine = 'yellow';
+    refreshButtons();
+  });
+  document.getElementById('rotate').addEventListener('click', () => {
+    rotation = (rotation + 1) & 3;
+    flash(`Rotated to ${rotation * 90}°`);
+  });
+  document.getElementById('hire-worker').addEventListener('click', () => {
+    if (money < 10) return flash('Not enough money');
+    money -= 10;
+    workers += 1;
+    flash('Hired a worker');
+  });
+  document.getElementById('center').addEventListener('click', () => {
+    player.x = 0;
+    player.y = 0;
+    camera.x = 0;
+    camera.y = 0;
+  });
+
+  // Panel toggle functionality
+  toggleBtn.addEventListener('click', () => {
+    buildPanel.classList.toggle('hidden');
+    toggleBtn.textContent = buildPanel.classList.contains('hidden') ? '◀' : '►';
+  });
+
+  document.getElementById('close-factory-menu').addEventListener('click', hideFactoryMenu);
+
+  refreshButtons();
+  flash('Build a line from the factory. Right-click the factory to buy and deploy trains.');
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
